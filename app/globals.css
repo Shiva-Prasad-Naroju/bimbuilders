@@ -1,0 +1,126 @@
+@import "tailwindcss";
+
+/* ── Light theme ── */
+:root {
+  --background: #ffffff;
+  --foreground: #18181b;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --accent-soft: #eff6ff;
+  --accent-glow: rgba(37, 99, 235, 0.15);
+  --surface: #fafafa;
+  --surface-elevated: #ffffff;
+  --border: #e4e4e7;
+  --border-subtle: #f4f4f5;
+  --text-primary: #18181b;
+  --text-secondary: #52525b;
+  --text-tertiary: #a1a1aa;
+  --neon-blue: #3b82f6;
+}
+
+/* ── Dark theme ── */
+.dark {
+  --background: #09090b;
+  --foreground: #fafafa;
+  --accent: #3b82f6;
+  --accent-hover: #60a5fa;
+  --accent-soft: rgba(59, 130, 246, 0.1);
+  --accent-glow: rgba(59, 130, 246, 0.2);
+  --surface: #111113;
+  --surface-elevated: #18181b;
+  --border: #27272a;
+  --border-subtle: #1c1c1e;
+  --text-primary: #fafafa;
+  --text-secondary: #a1a1aa;
+  --text-tertiary: #71717a;
+  --neon-blue: #60a5fa;
+}
+
+/* ── Tailwind 4 theme tokens ── */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-glow: var(--accent-glow);
+  --color-surface: var(--surface);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-border: var(--border);
+  --color-border-subtle: var(--border-subtle);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+  --color-neon-blue: var(--neon-blue);
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* ── Base ── */
+html {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+body {
+  background: var(--background);
+  color: var(--text-primary);
+}
+
+/* ── Selection ── */
+::selection {
+  background: rgb(219 234 254 / 0.9);
+  color: rgb(24 24 27);
+}
+
+.dark ::selection {
+  background: rgb(59 130 246 / 0.3);
+  color: rgb(250 250 250);
+}
+
+/* ── Focus ring ── */
+:focus-visible {
+  outline: 2px solid rgb(59 130 246 / 0.55);
+  outline-offset: 2px;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: var(--border);
+}
+
+/* ── Tool logo marquee ── */
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
+
+/* ── Reduce motion preference ── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
