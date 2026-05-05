@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Container } from "@/components/Container";
+import { Mail } from "lucide-react";
 
 export function Footer() {
   return (
@@ -70,10 +71,10 @@ export function Footer() {
               <ul className="mt-3 space-y-2 text-sm text-text-secondary">
                 <li>
                   <a
-                    href="mailto:BimBuilders1@gmail.com"
+                    href="mailto:info@bimbuilders.in"
                     className="transition-colors duration-150 hover:text-accent"
                   >
-                    BimBuilders1@gmail.com
+                    info@bimbuilders.in
                   </a>
                 </li>
                 <li>
@@ -93,16 +94,69 @@ export function Footer() {
 
         <div className="mt-8 flex flex-col gap-3 text-xs text-text-tertiary sm:flex-row sm:items-center sm:justify-between">
           <p>&copy; {new Date().getFullYear()} BIM Builders. All rights reserved.</p>
-          <div className="flex items-center gap-4">
-            <Link href="#" className="transition-colors duration-150 hover:text-text-primary">
-              Privacy
-            </Link>
-            <Link href="#" className="transition-colors duration-150 hover:text-text-primary">
-              Terms
-            </Link>
+          <div className="flex items-center gap-2">
+            <a 
+              href="mailto:info@bimbuilders.in" 
+              className="group relative flex h-10 w-10 items-center justify-center transition-all duration-500 ease-out hover:-translate-y-1"
+              title="Email Us"
+            >
+              <div className="absolute inset-0 scale-50 rounded-full bg-[#EA4335]/0 transition-all duration-500 group-hover:scale-100 group-hover:bg-[#EA4335]/10" />
+              <Mail className="relative h-5 w-5 text-[#EA4335] transition-transform duration-500 group-hover:scale-110" />
+            </a>
+            <a 
+              href="https://www.linkedin.com/company/bimbuilders/posts/?feedView=all" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="group relative flex h-10 w-10 items-center justify-center transition-all duration-500 ease-out hover:-translate-y-1"
+              title="LinkedIn"
+            >
+              <div className="absolute inset-0 scale-50 rounded-full bg-[#0A66C2]/0 transition-all duration-500 group-hover:scale-100 group-hover:bg-[#0A66C2]/10" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="relative text-[#0A66C2] transition-transform duration-500 group-hover:scale-110"
+              >
+                <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+                <rect width="4" height="12" x="2" y="9" />
+                <circle cx="4" cy="4" r="2" />
+              </svg>
+            </a>
+            <a 
+              href="https://www.instagram.com/bim_builders?utm_source=qr" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="group relative flex h-10 w-10 items-center justify-center transition-all duration-500 ease-out hover:-translate-y-1"
+              title="Instagram"
+            >
+              <div className="absolute inset-0 scale-50 rounded-full bg-[#E4405F]/0 transition-all duration-500 group-hover:scale-100 group-hover:bg-[#E4405F]/10" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="relative text-[#E4405F] transition-transform duration-500 group-hover:scale-110"
+              >
+                <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+              </svg>
+            </a>
+            <div className="h-4 w-px bg-border mx-2" />
             <button
               onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-              className="transition-colors duration-150 hover:text-accent"
+              className="text-xs font-medium transition-colors duration-150 hover:text-accent flex items-center gap-2"
             >
               Back to top &uarr;
             </button>

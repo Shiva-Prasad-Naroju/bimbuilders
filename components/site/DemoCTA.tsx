@@ -10,13 +10,36 @@ export function DemoCTA() {
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
+
+    const formData = new FormData(e.currentTarget);
+    const data = {
+      name: formData.get("name"),
+      email: formData.get("email"),
+      message: formData.get("message"),
+    };
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        setSent(true);
+      } else {
+        const errorData = await response.json();
+        alert(errorData.error || "Something went wrong. Please try again.");
+      }
+    } catch (error) {
+      console.error("Submission error:", error);
+      alert("Failed to send message. Please check your connection.");
+    } finally {
       setLoading(false);
-      setSent(true);
-    }, 1200);
+    }
   }
 
   const inputClass =
@@ -45,8 +68,8 @@ export function DemoCTA() {
               <div className="mt-8 space-y-3 text-sm text-zinc-300">
                 <div className="flex items-center gap-3">
                   <span className="text-zinc-500">Email:</span>
-                  <a href="mailto:BimBuilders1@gmail.com" className="text-white hover:text-blue-300 transition-colors">
-                    BimBuilders1@gmail.com
+                  <a href="mailto:info@bimbuilders.in" className="text-white hover:text-blue-300 transition-colors">
+                    info@bimbuilders.in
                   </a>
                 </div>
                 <div className="flex items-center gap-3">

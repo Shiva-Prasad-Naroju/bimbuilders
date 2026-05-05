@@ -9,6 +9,8 @@ import { TechStack } from "@/components/site/TechStack";
 import { DemoCTA } from "@/components/site/DemoCTA";
 import { Footer } from "@/components/site/Footer";
 
+import { AIAssistant } from "@/components/site/AIAssistant";
+
 export default function Home() {
   return (
     <>
@@ -24,6 +26,7 @@ export default function Home() {
         <DemoCTA />
       </main>
       <Footer />
+      <AIAssistant />
     </>
   );
 }
