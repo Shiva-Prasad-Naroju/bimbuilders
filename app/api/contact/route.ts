@@ -24,7 +24,7 @@ export async function POST(req: Request) {
         Email: ${email}
         Message: ${message}
       `,
-      reply_to: email,
+      replyTo: email,
     });
 
     if (teamError) {

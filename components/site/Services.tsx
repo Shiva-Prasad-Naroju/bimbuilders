@@ -113,7 +113,7 @@ export function Services() {
   const ActiveIcon = activeService.icon;
 
   return (
-    <section id="services" className="py-20 md:py-28 bg-background">
+    <section className="py-20 md:py-28 bg-background" aria-label="Services">
       <Container>
         <motion.div
           variants={stagger(40)}

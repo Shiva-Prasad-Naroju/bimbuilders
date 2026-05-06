@@ -114,6 +114,104 @@ body {
   animation: marquee 30s linear infinite;
 }
 
+/* ── Hero video: minimal cinematic drift (no motion when user prefers reduced) ── */
+@keyframes hero-video-drift {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.035);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero-video-drift {
+    animation: hero-video-drift 52s ease-in-out infinite alternate;
+    transform-origin: center center;
+    will-change: transform;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-video-drift {
+    animation: none;
+  }
+}
+
+/* ── Internal pages (non-home): tighten first block under sticky header ── */
+.internal-page
+  > section:first-child:not([aria-label="BIM in Action"]) {
+  padding-top: 0.75rem !important;
+}
+
+@media (min-width: 640px) {
+  .internal-page
+    > section:first-child:not([aria-label="BIM in Action"]) {
+    padding-top: 0.875rem !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .internal-page
+    > section:first-child:not([aria-label="BIM in Action"]) {
+    padding-top: 1rem !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .internal-page
+    > section:first-child:not([aria-label="BIM in Action"]) {
+    padding-top: 1.125rem !important;
+  }
+}
+
+@media (min-width: 1280px) {
+  .internal-page
+    > section:first-child:not([aria-label="BIM in Action"]) {
+    padding-top: 1.25rem !important;
+  }
+}
+
+/* BIM in Action: outer section has no vertical rhythm; mobile strip carries py */
+.internal-page
+  > section[aria-label="BIM in Action"]
+  > div:first-child {
+  padding-top: 0.75rem !important;
+}
+
+@media (min-width: 640px) {
+  .internal-page
+    > section[aria-label="BIM in Action"]
+    > div:first-child {
+    padding-top: 0.875rem !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .internal-page
+    > section[aria-label="BIM in Action"]
+    > div:first-child {
+    padding-top: 1rem !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .internal-page
+    > section[aria-label="BIM in Action"]
+    > div:first-child {
+    padding-top: 1.125rem !important;
+  }
+}
+
+@media (min-width: 1280px) {
+  .internal-page
+    > section[aria-label="BIM in Action"]
+    > div:first-child {
+    padding-top: 1.25rem !important;
+  }
+}
+
 /* ── Reduce motion preference ── */
 @media (prefers-reduced-motion: reduce) {
   *,

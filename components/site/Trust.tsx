@@ -271,10 +271,7 @@ function FeatureCardHorizontal({ feature }: { feature: Feature }) {
 
 export function Trust() {
   return (
-    <section
-      id="about"
-      className="relative overflow-hidden py-24 md:py-32 bg-surface"
-    >
+    <section className="relative overflow-hidden py-24 md:py-32 bg-surface" aria-label="About">
       {/* Blueprint dot-grid backdrop */}
       <div
         aria-hidden

@@ -12,6 +12,10 @@ export const metadata: Metadata = {
   title: "BIM Builders — Precision BIM That Makes Your Designs Build-Ready",
   description:
     "We create coordinated BIM models that improve design clarity, reduce conflicts, and support smooth construction — from concept to execution.",
+  icons: {
+    icon: [{ url: "/images/bb_logo.png", type: "image/png" }],
+    apple: "/images/bb_logo.png",
+  },
   openGraph: {
     title: "BIM Builders — Precision BIM That Makes Your Designs Build-Ready",
     description:
@@ -26,7 +30,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} h-full scroll-smooth`} suppressHydrationWarning>
+    <html lang="en" className={`${inter.variable} h-full`} suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{

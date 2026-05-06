@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-label="Autodesk Navisworks">
+  <title>Autodesk Navisworks</title>
+  <rect width="24" height="24" rx="4.5" fill="#E65826"/>
+  <path fill="#fff" fill-rule="evenodd" d="M12 5 6.5 7.8v8.4L12 19l5.5-2.8V7.8L12 5zm0 2.05 3.15 1.6v6.7L12 16.95 8.85 15.35V8.65L12 7.05z"/>
+  <path fill="none" stroke="#fff" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" d="m9.25 12.1 1.5 1 2.4-2.9 1.6 1.75"/>
+</svg>

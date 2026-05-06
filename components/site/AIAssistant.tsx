@@ -2,7 +2,10 @@
 
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageSquare, X, Send, Bot, User, Loader2, Sparkles } from "lucide-react";
+import { MessageSquare, X, Send, Bot, User, Loader2, Sparkles, Phone } from "lucide-react";
+
+const CONTACT_TEL = "+917981072411";
+const CONTACT_DISPLAY = "+91 79810 72411";
 
 interface Message {
   role: "user" | "assistant";
@@ -108,34 +111,63 @@ export function AIAssistant() {
 
   return (
     <>
-      {/* Floating Button */}
-      <motion.button
-        onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 z-[100] flex h-14 w-14 items-center justify-center rounded-full bg-accent text-white shadow-2xl transition-transform hover:scale-110 active:scale-95"
-        initial={{ scale: 0, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        whileHover={{ rotate: 10 }}
+      {/* Floating actions: call + chat — fixed, always visible */}
+      <div
+        className="fixed bottom-6 right-6 z-[100] flex flex-col-reverse items-end gap-3"
+        role="group"
+        aria-label="Quick contact and assistant"
       >
-        {isOpen ? <X className="h-6 w-6" /> : <MessageSquare className="h-6 w-6" />}
-        {!isOpen && (
-          <motion.div
-            className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 text-[10px] font-bold"
-            animate={{ scale: [1, 1.2, 1] }}
-            transition={{ repeat: Infinity, duration: 2 }}
-          >
-            1
-          </motion.div>
-        )}
-      </motion.button>
+        <motion.button
+          type="button"
+          onClick={() => setIsOpen(!isOpen)}
+          className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-accent text-white shadow-2xl ring-1 ring-white/10 transition-transform hover:scale-105 hover:shadow-accent/25 active:scale-95"
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 400, damping: 28, delay: 0.05 }}
+          whileHover={{ rotate: isOpen ? 0 : 8 }}
+          aria-expanded={isOpen}
+          aria-controls="bim-assistant-panel"
+          id="bim-assistant-launch"
+        >
+          {isOpen ? <X className="h-6 w-6" aria-hidden /> : <MessageSquare className="h-6 w-6" aria-hidden />}
+          {!isOpen && (
+            <motion.span
+              className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 text-[10px] font-bold text-white shadow-sm"
+              animate={{ scale: [1, 1.15, 1] }}
+              transition={{ repeat: Infinity, duration: 2 }}
+              aria-hidden
+            >
+              1
+            </motion.span>
+          )}
+          <span className="sr-only">{isOpen ? "Close assistant" : "Open BIM assistant"}</span>
+        </motion.button>
+
+        <motion.a
+          href={`tel:${CONTACT_TEL}`}
+          title={`Call ${CONTACT_DISPLAY}`}
+          aria-label={`Call us at ${CONTACT_DISPLAY}`}
+          className="group flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-accent/35 bg-background/95 text-accent shadow-2xl backdrop-blur-md ring-1 ring-white/10 transition-all hover:scale-105 hover:border-accent/55 hover:bg-accent/5 hover:shadow-[0_12px_40px_-8px_rgba(59,130,246,0.35)] active:scale-95"
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 400, damping: 28 }}
+        >
+          <Phone className="h-6 w-6" strokeWidth={2} aria-hidden />
+        </motion.a>
+      </div>
 
       {/* Chat Window */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
+            id="bim-assistant-panel"
+            role="dialog"
+            aria-modal="true"
+            aria-label="BIM Assistant chat"
             initial={{ opacity: 0, y: 20, scale: 0.95, transformOrigin: "bottom right" }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-24 right-6 z-[100] flex h-[500px] w-[350px] flex-col overflow-hidden rounded-2xl border border-border bg-surface-elevated shadow-2xl backdrop-blur-xl sm:w-[400px]"
+            className="fixed bottom-[10rem] right-6 z-[100] flex h-[min(500px,calc(100vh-12rem))] w-[min(350px,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-border bg-surface-elevated shadow-2xl backdrop-blur-xl sm:bottom-[9.5rem] sm:w-[400px]"
           >
             {/* Header */}
             <div className="flex items-center justify-between border-b border-border bg-accent/5 p-4">

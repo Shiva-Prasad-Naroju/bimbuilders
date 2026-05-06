@@ -1,26 +1,24 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { Container } from "@/components/Container";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { mainNav } from "@/lib/site/nav";
 
-const nav = [
-  { href: "#about", label: "About" },
-  { href: "#services", label: "Services" },
-  { href: "#bim-action", label: "BIM in Action" },
-  { href: "#process", label: "Process" },
-  { href: "#projects", label: "Projects" },
-  { href: "#stack", label: "Tools" },
-  { href: "#contact", label: "Contact" },
-];
+function navLinkActive(pathname: string, href: string): boolean {
+  if (href === "/") return pathname === "/";
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
 
 export function Header() {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [activeSection, setActiveSection] = useState("");
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -30,70 +28,63 @@ export function Header() {
   }, []);
 
   useEffect(() => {
-    const ids = nav.map((n) => n.href.slice(1));
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            setActiveSection(entry.target.id);
-          }
-        }
-      },
-      { rootMargin: "-40% 0px -55% 0px" }
-    );
-    ids.forEach((id) => {
-      const el = document.getElementById(id);
-      if (el) observer.observe(el);
-    });
-    return () => observer.disconnect();
-  }, []);
+    setOpen(false);
+  }, [pathname]);
 
   return (
     <header
       className={`fixed inset-x-0 top-0 z-50 transition-[background,box-shadow,border-color] duration-300 ${
         scrolled
           ? "border-b border-border bg-background/90 shadow-sm backdrop-blur-md"
-          : "border-b border-transparent bg-transparent"
+          : "border-b border-transparent bg-background/80 backdrop-blur-sm supports-[backdrop-filter]:bg-background/60"
       }`}
     >
       <Container className="flex h-16 items-center justify-between gap-4">
         <Link
           href="/"
-          className="text-[15px] tracking-tight text-text-primary transition-opacity duration-150 hover:opacity-70 active:opacity-60"
+          className="flex items-center rounded-md outline-offset-4 transition-opacity duration-150 hover:opacity-80 active:opacity-70"
         >
-          <span className="font-bold">BIM</span>
-          <span className="font-light ml-0.5">Builders</span>
+          <Image
+            src="/images/bb_logo.png"
+            alt="BIM Builders"
+            width={200}
+            height={48}
+            className="h-8 w-auto"
+            priority
+          />
         </Link>
 
-        <nav className="hidden items-center gap-7 lg:flex" aria-label="Primary">
-          {nav.map((item) => (
-            <a
-              key={item.href}
-              href={item.href}
-              className={`group relative text-sm font-medium transition-colors duration-150 ${
-                activeSection === item.href.slice(1)
-                  ? "text-accent"
-                  : "text-text-secondary hover:text-text-primary"
-              }`}
-            >
-              {item.label}
-              <span
-                className={`absolute -bottom-1 left-0 h-[1.5px] rounded-full bg-accent transition-[width] duration-200 ease-out ${
-                  activeSection === item.href.slice(1) ? "w-full" : "w-0 group-hover:w-full"
+        <nav className="hidden items-center gap-1 lg:flex lg:gap-0.5" aria-label="Primary">
+          {mainNav.map((item) => {
+            const active = navLinkActive(pathname, item.href);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`group relative rounded-md px-2.5 py-2 text-sm font-medium transition-colors duration-200 ease-out outline-offset-4 ${
+                  active ? "text-accent" : "text-text-secondary hover:text-text-primary"
                 }`}
-              />
-            </a>
-          ))}
+              >
+                {item.label}
+                <span
+                  className={`absolute bottom-1 left-2 right-2 h-[2px] rounded-full bg-accent transition-[opacity,transform] duration-200 ease-out ${
+                    active ? "opacity-100" : "opacity-0 group-hover:opacity-40"
+                  }`}
+                  aria-hidden
+                />
+              </Link>
+            );
+          })}
         </nav>
 
         <div className="hidden items-center gap-3 lg:flex">
           <ThemeToggle />
-          <a
-            href="#contact"
-            className="inline-flex h-9 items-center justify-center rounded-full bg-accent px-4 text-sm font-medium text-white shadow-sm transition-all duration-150 hover:scale-[1.02] hover:bg-accent-hover hover:shadow-md active:scale-[0.98]"
+          <Link
+            href="/contact"
+            className="inline-flex h-9 items-center justify-center rounded-full bg-accent px-4 text-sm font-medium text-white shadow-sm transition-all duration-200 ease-out hover:scale-[1.02] hover:bg-accent-hover hover:shadow-md active:scale-[0.98]"
           >
             Get a Quote
-          </a>
+          </Link>
         </div>
 
         <div className="flex items-center gap-2 lg:hidden">
@@ -119,31 +110,33 @@ export function Header() {
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
           >
-            <div className="flex flex-col gap-3 py-4">
-              {nav.map((item, i) => (
-                <motion.a
-                  key={item.href}
-                  href={item.href}
-                  className={`text-sm font-medium transition-colors duration-150 ${
-                    activeSection === item.href.slice(1)
-                      ? "text-accent"
-                      : "text-text-secondary hover:text-text-primary"
-                  }`}
-                  onClick={() => setOpen(false)}
-                  initial={{ opacity: 0, x: -8 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.2, delay: i * 0.04 }}
-                >
-                  {item.label}
-                </motion.a>
-              ))}
-              <a
-                href="#contact"
-                className="mt-1 inline-flex h-10 items-center justify-center rounded-full bg-accent text-sm font-medium text-white transition-all duration-150 hover:bg-accent-hover active:scale-[0.98]"
-                onClick={() => setOpen(false)}
+            <div className="flex flex-col gap-1 py-4">
+              {mainNav.map((item, i) => {
+                const active = navLinkActive(pathname, item.href);
+                return (
+                  <motion.div
+                    key={item.href}
+                    initial={{ opacity: 0, x: -6 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.2, delay: i * 0.04 }}
+                  >
+                    <Link
+                      href={item.href}
+                      className={`block rounded-lg px-3 py-2.5 text-sm font-medium transition-colors duration-150 ${
+                        active ? "bg-accent/10 text-accent" : "text-text-secondary hover:bg-surface hover:text-text-primary"
+                      }`}
+                    >
+                      {item.label}
+                    </Link>
+                  </motion.div>
+                );
+              })}
+              <Link
+                href="/contact"
+                className="mt-2 inline-flex h-10 items-center justify-center rounded-full bg-accent text-sm font-medium text-white transition-all duration-150 hover:bg-accent-hover active:scale-[0.98]"
               >
                 Get a Quote
-              </a>
+              </Link>
             </div>
           </motion.div>
         )}

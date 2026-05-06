@@ -128,7 +128,7 @@ export function CaseStudy() {
   };
 
   return (
-    <section id="projects" className="relative py-24 md:py-36 bg-surface overflow-hidden">
+    <section className="relative py-24 md:py-36 bg-surface overflow-hidden" aria-label="Projects">
       {/* Soft Animated Background Element */}
       <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-accent/5 rounded-full blur-[150px] opacity-70 pointer-events-none translate-x-1/2 -translate-y-1/2" />
 

@@ -26,19 +26,19 @@ export function Footer() {
               </p>
               <ul className="mt-3 space-y-2 text-sm text-text-secondary">
                 <li>
-                  <a href="#services" className="transition-colors duration-150 hover:text-text-primary">
+                  <Link href="/services" className="transition-colors duration-150 hover:text-text-primary">
                     BIM Modeling
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#services" className="transition-colors duration-150 hover:text-text-primary">
+                  <Link href="/services" className="transition-colors duration-150 hover:text-text-primary">
                     Coordination
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#projects" className="transition-colors duration-150 hover:text-text-primary">
+                  <Link href="/projects" className="transition-colors duration-150 hover:text-text-primary">
                     Projects
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -48,19 +48,19 @@ export function Footer() {
               </p>
               <ul className="mt-3 space-y-2 text-sm text-text-secondary">
                 <li>
-                  <a href="#about" className="transition-colors duration-150 hover:text-text-primary">
+                  <Link href="/about" className="transition-colors duration-150 hover:text-text-primary">
                     About Us
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#process" className="transition-colors duration-150 hover:text-text-primary">
+                  <Link href="/process" className="transition-colors duration-150 hover:text-text-primary">
                     Our Process
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#stack" className="transition-colors duration-150 hover:text-text-primary">
+                  <Link href="/tools" className="transition-colors duration-150 hover:text-text-primary">
                     Tools
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -69,6 +69,11 @@ export function Footer() {
                 Contact
               </p>
               <ul className="mt-3 space-y-2 text-sm text-text-secondary">
+                <li>
+                  <Link href="/contact" className="transition-colors duration-150 hover:text-text-primary">
+                    Contact form
+                  </Link>
+                </li>
                 <li>
                   <a
                     href="mailto:info@bimbuilders.in"

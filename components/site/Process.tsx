@@ -42,7 +42,7 @@ export function Process() {
   const lineHeight = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
 
   return (
-    <section id="process" className="py-20 md:py-28" ref={sectionRef}>
+    <section className="py-20 md:py-28" ref={sectionRef} aria-label="Process">
       <Container>
         <motion.div
           initial="hidden"

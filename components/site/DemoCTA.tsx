@@ -46,7 +46,7 @@ export function DemoCTA() {
     "mt-1.5 w-full rounded-xl border border-white/10 bg-zinc-950/40 px-3 py-2.5 text-sm text-white outline-none placeholder:text-zinc-500 transition-[border-color,box-shadow] duration-200 focus:border-blue-400/60 focus:ring-2 focus:ring-blue-500/30";
 
   return (
-    <section id="contact" className="scroll-mt-24 py-20 md:py-28">
+    <section className="py-20 md:py-28" aria-label="Contact">
       <Container>
         <div className="overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-zinc-900 via-zinc-900 to-blue-950 px-6 py-12 shadow-[0_24px_80px_-32px_rgba(15,23,42,0.65)] sm:px-10 md:py-14">
           <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)] lg:items-center lg:gap-14">
