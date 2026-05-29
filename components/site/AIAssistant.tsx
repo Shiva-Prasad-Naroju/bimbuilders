@@ -2,10 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageSquare, X, Send, Bot, User, Loader2, Sparkles, Phone } from "lucide-react";
-
-const CONTACT_TEL = "+917981072411";
-const CONTACT_DISPLAY = "+91 79810 72411";
+import { X, Send, Bot, User, Loader2, Sparkles } from "lucide-react";
 
 interface Message {
   role: "user" | "assistant";
@@ -47,8 +44,13 @@ function FormattedMessage({ content }: { content: string }) {
   );
 }
 
-export function AIAssistant() {
-  const [isOpen, setIsOpen] = useState(false);
+export function AIAssistant({
+  isOpen,
+  onOpenChange,
+}: {
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
@@ -111,52 +113,6 @@ export function AIAssistant() {
 
   return (
     <>
-      {/* Floating actions: call + chat — fixed, always visible */}
-      <div
-        className="fixed bottom-6 right-6 z-[100] flex flex-col-reverse items-end gap-3"
-        role="group"
-        aria-label="Quick contact and assistant"
-      >
-        <motion.button
-          type="button"
-          onClick={() => setIsOpen(!isOpen)}
-          className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-accent text-white shadow-2xl ring-1 ring-white/10 transition-transform hover:scale-105 hover:shadow-accent/25 active:scale-95"
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ type: "spring", stiffness: 400, damping: 28, delay: 0.05 }}
-          whileHover={{ rotate: isOpen ? 0 : 8 }}
-          aria-expanded={isOpen}
-          aria-controls="bim-assistant-panel"
-          id="bim-assistant-launch"
-        >
-          {isOpen ? <X className="h-6 w-6" aria-hidden /> : <MessageSquare className="h-6 w-6" aria-hidden />}
-          {!isOpen && (
-            <motion.span
-              className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 text-[10px] font-bold text-white shadow-sm"
-              animate={{ scale: [1, 1.15, 1] }}
-              transition={{ repeat: Infinity, duration: 2 }}
-              aria-hidden
-            >
-              1
-            </motion.span>
-          )}
-          <span className="sr-only">{isOpen ? "Close assistant" : "Open BIM assistant"}</span>
-        </motion.button>
-
-        <motion.a
-          href={`tel:${CONTACT_TEL}`}
-          title={`Call ${CONTACT_DISPLAY}`}
-          aria-label={`Call us at ${CONTACT_DISPLAY}`}
-          className="group flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-accent/35 bg-background/95 text-accent shadow-2xl backdrop-blur-md ring-1 ring-white/10 transition-all hover:scale-105 hover:border-accent/55 hover:bg-accent/5 hover:shadow-[0_12px_40px_-8px_rgba(59,130,246,0.35)] active:scale-95"
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ type: "spring", stiffness: 400, damping: 28 }}
-        >
-          <Phone className="h-6 w-6" strokeWidth={2} aria-hidden />
-        </motion.a>
-      </div>
-
-      {/* Chat Window */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -167,37 +123,43 @@ export function AIAssistant() {
             initial={{ opacity: 0, y: 20, scale: 0.95, transformOrigin: "bottom right" }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-[10rem] right-6 z-[100] flex h-[min(500px,calc(100vh-12rem))] w-[min(350px,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-border bg-surface-elevated shadow-2xl backdrop-blur-xl sm:bottom-[9.5rem] sm:w-[400px]"
+            style={{
+              bottom: "max(1rem, env(safe-area-inset-bottom, 1rem))",
+            }}
+            // Mobile: compact popup anchored bottom-right (~20rem × 28rem),
+            // doesn't blanket the page. sm+ keeps the original generous size.
+            className="fixed right-4 z-[100] flex h-[min(28rem,calc(100dvh-7rem))] w-[min(20rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-border bg-surface-elevated shadow-2xl backdrop-blur-xl sm:right-6 sm:h-[min(35rem,calc(100dvh-6rem))] sm:w-[min(25rem,calc(100vw-3rem))]"
           >
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-border bg-accent/5 p-4">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent/10">
-                  <Bot className="h-6 w-6 text-accent" />
+            <div className="flex items-center justify-between border-b border-border bg-accent/5 p-3 sm:p-4">
+              <div className="flex items-center gap-2.5 sm:gap-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent/10 sm:h-10 sm:w-10">
+                  <Bot className="h-4 w-4 text-accent sm:h-6 sm:w-6" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-text-primary">BIM Assistant</h3>
+                  <h3 className="text-[13px] font-bold text-text-primary sm:text-sm">BIM Assistant</h3>
                   <div className="flex items-center gap-1.5">
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                     <span className="text-[10px] font-medium text-text-tertiary">Online</span>
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-accent/50" />
-                <button 
-                  onClick={() => setIsOpen(false)}
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <Sparkles className="hidden h-4 w-4 text-accent/50 sm:block" />
+                <button
+                  onClick={() => onOpenChange(false)}
                   className="rounded-full p-1 text-text-tertiary hover:bg-border hover:text-text-primary transition-colors"
+                  aria-label="Close assistant"
                 >
-                  <X className="h-5 w-5" />
+                  <X className="h-4 w-4 sm:h-5 sm:w-5" />
                 </button>
               </div>
             </div>
 
             {/* Messages */}
-            <div 
+            <div
               ref={scrollRef}
-              className="flex-1 overflow-y-auto p-4 space-y-6 scroll-smooth"
+              className="flex-1 space-y-3 overflow-y-auto overscroll-contain p-3 scroll-smooth sm:space-y-6 sm:p-4"
             >
               {messages.map((m, i) => (
                 <motion.div
@@ -206,13 +168,13 @@ export function AIAssistant() {
                   animate={{ opacity: 1, y: 0 }}
                   className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
                 >
-                  <div className={`flex max-w-[85%] items-start gap-2.5 ${m.role === "user" ? "flex-row-reverse" : "flex-row"}`}>
-                    <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border ${m.role === "user" ? "bg-accent text-white" : "bg-surface"}`}>
-                      {m.role === "user" ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
+                  <div className={`flex max-w-[88%] items-start gap-2 sm:gap-2.5 ${m.role === "user" ? "flex-row-reverse" : "flex-row"}`}>
+                    <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-border sm:h-8 sm:w-8 ${m.role === "user" ? "bg-accent text-white" : "bg-surface"}`}>
+                      {m.role === "user" ? <User className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> : <Bot className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
                     </div>
-                    <div className={`rounded-2xl px-4 py-3 text-sm tracking-tight ${
-                      m.role === "user" 
-                        ? "bg-accent text-white rounded-tr-none" 
+                    <div className={`rounded-2xl px-3 py-2.5 text-[13px] leading-relaxed tracking-tight sm:px-4 sm:py-3 sm:text-sm ${
+                      m.role === "user"
+                        ? "bg-accent text-white rounded-tr-none"
                         : "bg-surface border border-border text-text-secondary rounded-tl-none shadow-sm"
                     }`}>
                       <FormattedMessage content={m.content} />
@@ -235,24 +197,25 @@ export function AIAssistant() {
             </div>
 
             {/* Input */}
-            <form 
+            <form
               onSubmit={handleSubmit}
-              className="border-t border-border p-4 bg-surface"
+              className="border-t border-border bg-surface p-3 sm:p-4"
             >
               <div className="relative flex items-center">
                 <input
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="Ask about our BIM services..."
-                  className="w-full rounded-xl border border-border bg-surface-elevated px-4 py-3 pr-12 text-sm text-text-primary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20 transition-all"
+                  placeholder="Ask anything…"
+                  className="w-full rounded-xl border border-border bg-surface-elevated px-3 py-2.5 pr-11 text-[13px] text-text-primary transition-all focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20 sm:px-4 sm:py-3 sm:pr-12 sm:text-sm"
                 />
                 <button
                   type="submit"
                   disabled={!input.trim() || isLoading}
-                  className="absolute right-2 flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-white transition-all hover:bg-accent/90 disabled:opacity-50 disabled:hover:bg-accent"
+                  className="absolute right-1.5 flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-white transition-all hover:bg-accent/90 disabled:opacity-50 disabled:hover:bg-accent sm:right-2 sm:h-9 sm:w-9"
+                  aria-label="Send message"
                 >
-                  {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                  {isLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin sm:h-4 sm:w-4" /> : <Send className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
                 </button>
               </div>
             </form>

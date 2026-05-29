@@ -2,21 +2,25 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
-First, run the development server:
+Run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Dev troubleshooting
+
+`npm run dev` runs a **predev** check that clears a stale `.next/dev` cache when routes (for example `/about`) are missing from Turbopack’s route manifest. That prevents 404s after adding pages or when the cache is corrupted on slow/network drives.
+
+If issues persist, use a full clean start:
+
+```bash
+npm run dev:clean
+```
+
+Homepage sections live under `app/(site)/`. Internal pages (About, Contact, Services, Projects) are under `app/(site)/about` and `app/(site)/(internal)/`.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 

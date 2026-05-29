@@ -1,5 +1,11 @@
 import type { Metadata } from "next";
 import { Hero } from "@/components/site/Hero";
+import { Achievements } from "@/components/site/Achievements";
+import { WhatWeCanDo } from "@/components/site/WhatWeCanDo";
+import { BIMInAction } from "@/components/site/BIMInAction";
+import { Process } from "@/components/site/Process";
+import { TechStack } from "@/components/site/TechStack";
+import { Reviews } from "@/components/site/Reviews";
 import { SITE_NAME } from "@/lib/site/nav";
 
 export const metadata: Metadata = {
@@ -15,5 +21,15 @@ export const metadata: Metadata = {
 };
 
 export default function HomePage() {
-  return <Hero />;
+  return (
+    <>
+      <Hero />
+      <WhatWeCanDo />
+      <Achievements />
+      <BIMInAction />
+      <Process />
+      <TechStack />
+      <Reviews />
+    </>
+  );
 }

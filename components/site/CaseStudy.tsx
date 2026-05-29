@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
+import { Building, Building2, ChevronLeft, ChevronRight, Frame, Heart, X } from "lucide-react";
 import { Container } from "@/components/Container";
 import { fadeUp, stagger, medium } from "@/lib/motion";
-import { Building, Building2, Heart, ArrowLeft, ArrowRight, ArrowDown, ArrowUp, X } from "lucide-react";
+import { useHydrated } from "@/lib/hooks";
 
 const projects = [
   {
@@ -25,7 +27,11 @@ const projects = [
       "Eradicated design conflicts before execution",
       "Secured massive time and cost savings",
     ],
-    colors: { text: "text-blue-500", bg: "bg-blue-500", bgLight: "bg-blue-500/5", glow: "shadow-[0_0_20px_rgba(59,130,246,0.3)]" },
+    colors: {
+      text: "text-blue-500",
+      bg: "bg-blue-500",
+      bgLight: "bg-blue-500/10",
+    },
     badgeLabel: "Featured Architecture",
     icon: Building,
     gallery: [
@@ -37,7 +43,7 @@ const projects = [
       "/images/25F_ProjectImages/7.avif",
       "/images/25F_ProjectImages/8.avif",
       "/images/25F_ProjectImages/9.avif",
-    ]
+    ],
   },
   {
     type: "Healthcare",
@@ -56,7 +62,11 @@ const projects = [
       "Optimized acute medical workflow routing",
       "Flawless multi-disciplinary system integration",
     ],
-    colors: { text: "text-emerald-500", bg: "bg-emerald-500", bgLight: "bg-emerald-500/5", glow: "shadow-[0_0_20px_rgba(16,185,129,0.3)]" },
+    colors: {
+      text: "text-emerald-500",
+      bg: "bg-emerald-500",
+      bgLight: "bg-emerald-500/10",
+    },
     badgeLabel: "Healthcare Infrastructure",
     icon: Heart,
     gallery: [
@@ -89,7 +99,11 @@ const projects = [
       "Absolute reduction of logical execution inconsistencies",
       "Accelerated master design delivery phases",
     ],
-    colors: { text: "text-amber-500", bg: "bg-amber-500", bgLight: "bg-amber-500/5", glow: "shadow-[0_0_20px_rgba(245,158,11,0.3)]" },
+    colors: {
+      text: "text-amber-500",
+      bg: "bg-amber-500",
+      bgLight: "bg-amber-500/10",
+    },
     badgeLabel: "Enterprise Development",
     icon: Building2,
     gallery: [
@@ -100,337 +114,467 @@ const projects = [
       "/images/VaageswariSolutions/5.avif",
     ],
   },
-];
+  {
+    type: "Residential",
+    title: "LGSF Residential BIM",
+    image: "/images/LGSF_ProjectImages/1.jpeg",
+    overview:
+      "Fully coordinated Light Gauge Steel Framing residential model delivered in Autodesk Revit — wall studs, roof trusses, rafters, and framing assemblies built parametrically for clash-free, construction-ready execution.",
+    scope: [
+      "LGSF wall, truss, and rafter framing in Revit",
+      "Architectural and structural BIM coordination",
+      "Navisworks clash detection and resolution",
+      "Shop drawings, sections, elevations, and 3D visualizations",
+    ],
+    outcome: [
+      "Construction-ready LOD 300 framing documentation",
+      "Reduced on-site conflicts through pre-built coordination",
+      "Faster documentation turnaround via Revit automation",
+    ],
+    colors: {
+      text: "text-cyan-400",
+      bg: "bg-cyan-400",
+      bgLight: "bg-cyan-400/10",
+    },
+    badgeLabel: "Light Gauge Steel Framing",
+    icon: Frame,
+    gallery: [
+      "/images/LGSF_ProjectImages/1.jpeg",
+      "/images/LGSF_ProjectImages/2.jpeg",
+      "/images/LGSF_ProjectImages/3.jpeg",
+      "/images/LGSF_ProjectImages/4.jpeg",
+      "/images/LGSF_ProjectImages/5.jpeg",
+      "/images/LGSF_ProjectImages/6.jpeg",
+      "/images/LGSF_ProjectImages/7.jpeg",
+    ],
+  },
+] as const;
 
-export function CaseStudy() {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [expandedProjectIndex, setExpandedProjectIndex] = useState<number | null>(null);
+type Project = (typeof projects)[number];
 
-  useEffect(() => {
-    if (expandedProjectIndex !== null) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [expandedProjectIndex]);
-
-  const nextSlide = () => {
-    setCurrentIndex((prev) => (prev === projects.length - 1 ? 0 : prev + 1));
-    setExpandedProjectIndex(null);
-  };
-
-  const prevSlide = () => {
-    setCurrentIndex((prev) => (prev === 0 ? projects.length - 1 : prev - 1));
-    setExpandedProjectIndex(null);
-  };
+function ProjectCard({
+  project,
+  index,
+  onOpen,
+}: {
+  project: Project;
+  index: number;
+  onOpen: () => void;
+}) {
+  const isHospital = project.title.includes("Hospital");
+  const isPhotoCover = isHospital || project.title.includes("LGSF");
 
   return (
-    <section className="relative py-24 md:py-36 bg-surface overflow-hidden" aria-label="Projects">
-      {/* Soft Animated Background Element */}
-      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-accent/5 rounded-full blur-[150px] opacity-70 pointer-events-none translate-x-1/2 -translate-y-1/2" />
+    <motion.button
+      type="button"
+      onClick={onOpen}
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-40px" }}
+      transition={{ duration: 0.45, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
+      whileHover={{ y: -4 }}
+      className="group w-full text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent/60"
+    >
+      <div className="overflow-hidden rounded-xl border border-border/80 bg-surface-elevated shadow-[0_12px_40px_-24px_rgba(0,0,0,0.35)] transition-[border-color,box-shadow] duration-300 group-hover:border-accent/35 group-hover:shadow-[0_20px_50px_-20px_var(--accent-glow)]">
+        <motion.div
+          className={`relative aspect-[4/3] w-full overflow-hidden ${
+            isHospital ? "bg-white" : "bg-gradient-to-br from-surface to-surface-elevated"
+          }`}
+        >
+          <Image
+            src={project.image}
+            alt={project.title}
+            fill
+            sizes="(max-width: 639px) 100vw, (max-width: 1023px) 50vw, (max-width: 1535px) 33vw, 25vw"
+            className={`transition-transform duration-500 ease-out group-hover:scale-[1.04] ${
+              isPhotoCover ? "object-cover object-center" : "object-contain object-center p-4 sm:p-6"
+            }`}
+            priority={index === 0}
+          />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+        </motion.div>
+        <div className="border-t border-border/60 px-4 py-4 sm:px-5 sm:py-5">
+          <p className={`text-[10px] font-medium uppercase tracking-[0.18em] ${project.colors.text}`}>
+            {project.badgeLabel}
+          </p>
+          <h3 className="mt-1.5 text-balance text-lg font-semibold tracking-tight text-text-primary sm:text-xl">
+            {project.title}
+          </h3>
+          <p className="mt-2 text-[13px] text-text-tertiary transition-colors group-hover:text-accent">
+            View project →
+          </p>
+        </div>
+      </div>
+    </motion.button>
+  );
+}
+
+function ProjectGalleryCarousel({
+  images,
+  projectTitle,
+}: {
+  images: readonly string[];
+  projectTitle: string;
+}) {
+  const [index, setIndex] = useState(0);
+  const [prevImages, setPrevImages] = useState(images);
+  const touchStartX = useRef<number | null>(null);
+  const count = images.length;
+
+  // Reset to the first image when a different project's images are shown.
+  // Done during render (not in an effect) to avoid a stale frame at the old index.
+  if (images !== prevImages) {
+    setPrevImages(images);
+    setIndex(0);
+  }
+
+  const goPrev = useCallback(() => {
+    setIndex((i) => (i === 0 ? count - 1 : i - 1));
+  }, [count]);
+
+  const goNext = useCallback(() => {
+    setIndex((i) => (i === count - 1 ? 0 : i + 1));
+  }, [count]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        goPrev();
+      }
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        goNext();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [goPrev, goNext]);
+
+  if (count === 0) return null;
+
+  const current = images[index]!;
+
+  return (
+    <div
+      role="region"
+      aria-roledescription="carousel"
+      aria-label={`${projectTitle} project images`}
+    >
+      <div className="flex items-center gap-2 sm:gap-3">
+        <button
+          type="button"
+          onClick={goPrev}
+          aria-label="Previous image"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-surface-elevated text-text-secondary shadow-sm transition-colors hover:border-accent/40 hover:bg-accent-soft hover:text-accent sm:h-11 sm:w-11"
+        >
+          <ChevronLeft className="h-5 w-5" strokeWidth={1.75} aria-hidden />
+        </button>
+
+        <div
+          className="relative min-h-[200px] min-w-0 flex-1 overflow-hidden rounded-xl border border-border/60 bg-zinc-950/30 dark:bg-zinc-950/50"
+          style={{ height: "min(52vh, 28rem)" }}
+          onTouchStart={(e) => {
+            touchStartX.current = e.touches[0]?.clientX ?? null;
+          }}
+          onTouchEnd={(e) => {
+            const start = touchStartX.current;
+            touchStartX.current = null;
+            if (start === null) return;
+            const end = e.changedTouches[0]?.clientX ?? start;
+            const dx = end - start;
+            if (Math.abs(dx) > 48) {
+              if (dx < 0) goNext();
+              else goPrev();
+            }
+          }}
+        >
+          <AnimatePresence initial={false} mode="wait">
+            <motion.div
+              key={current}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+              className="absolute inset-0 flex items-center justify-center p-3 sm:p-5"
+            >
+              <Image
+                src={current}
+                alt={`${projectTitle} — image ${index + 1} of ${count}`}
+                fill
+                className="object-contain object-center"
+                sizes="(max-width: 768px) 90vw, (max-width: 1280px) 720px, (max-width: 1920px) 900px, 1100px"
+                quality={75}
+                priority={index === 0}
+              />
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        <button
+          type="button"
+          onClick={goNext}
+          aria-label="Next image"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-surface-elevated text-text-secondary shadow-sm transition-colors hover:border-accent/40 hover:bg-accent-soft hover:text-accent sm:h-11 sm:w-11"
+        >
+          <ChevronRight className="h-5 w-5" strokeWidth={1.75} aria-hidden />
+        </button>
+      </div>
+
+      {count > 1 ? (
+        <div
+          className="mt-6 flex items-center justify-center gap-1.5 sm:gap-2"
+          role="tablist"
+          aria-label="Image slides"
+        >
+          {images.map((img, i) => (
+            <button
+              key={img}
+              type="button"
+              role="tab"
+              aria-selected={i === index}
+              aria-label={`Image ${i + 1} of ${count}`}
+              onClick={() => setIndex(i)}
+              className={`relative h-1.5 shrink-0 rounded-full transition-[width,background-color] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+                i === index
+                  ? "w-6 bg-text-primary shadow-[0_0_10px_var(--accent-glow)]"
+                  : "w-1.5 bg-text-tertiary/35 hover:bg-text-tertiary/65"
+              }`}
+            />
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function ProjectDetailModal({
+  project,
+  onClose,
+}: {
+  project: Project;
+  onClose: () => void;
+}) {
+  const Icon = project.icon;
+
+  return (
+    <motion.div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="project-modal-title"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.25 }}
+      className="fixed inset-0 z-[260] isolate"
+    >
+      <motion.button
+        type="button"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+        className="fixed inset-0 z-[265] bg-background/80 backdrop-blur-md"
+        aria-label="Close project"
+      />
+
+      <div className="fixed inset-0 z-[270] overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch]">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 8 }}
+          transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+          className="relative mx-auto min-h-full w-full max-w-4xl px-4 pb-12 pt-14 sm:px-6 sm:pb-16 sm:pt-16 md:max-w-5xl"
+        >
+          <button
+            type="button"
+            onClick={onClose}
+            className="fixed right-4 top-4 z-[280] flex h-10 w-10 items-center justify-center rounded-full border border-border bg-surface-elevated text-text-secondary shadow-md transition-colors hover:text-text-primary sm:right-6 sm:top-6"
+            aria-label="Close"
+          >
+            <X className="h-4 w-4" />
+          </button>
+
+          <header className="pb-6 sm:pb-8">
+            <div
+              className={`mb-4 inline-flex items-center gap-2 rounded-full border border-border px-3 py-1.5 ${project.colors.bgLight}`}
+            >
+              <Icon className={`h-3.5 w-3.5 ${project.colors.text}`} aria-hidden />
+              <span className={`text-[10px] font-semibold uppercase tracking-[0.16em] sm:text-[11px] ${project.colors.text}`}>
+                {project.badgeLabel}
+              </span>
+            </div>
+            <h2
+              id="project-modal-title"
+              className="text-balance text-2xl font-semibold tracking-tight text-text-primary sm:text-3xl md:text-4xl"
+            >
+              {project.title}
+            </h2>
+            <p className="mt-4 max-w-3xl text-pretty text-base leading-relaxed text-text-secondary sm:text-lg">
+              {project.overview}
+            </p>
+          </header>
+
+          <section aria-label="Project images">
+            <ProjectGalleryCarousel
+              images={project.gallery}
+              projectTitle={project.title}
+            />
+          </section>
+
+          <div className="mt-8 border-t border-border/80 pt-8 sm:mt-10 sm:pt-10">
+            <div className="grid gap-8 sm:grid-cols-2 sm:gap-10">
+              <div>
+                <h3 className="text-[11px] font-medium uppercase tracking-[0.18em] text-text-tertiary">
+                  Project scope
+                </h3>
+                <ul className="mt-3 space-y-2.5">
+                  {project.scope.map((item) => (
+                    <li
+                      key={item}
+                      className="flex items-start gap-2.5 text-sm leading-relaxed text-text-primary"
+                    >
+                      <span
+                        className={`mt-2 h-1.5 w-1.5 shrink-0 rounded-full ${project.colors.bg}`}
+                        aria-hidden
+                      />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3 className={`text-[11px] font-medium uppercase tracking-[0.18em] ${project.colors.text}`}>
+                  Key outcomes
+                </h3>
+                <ul className="mt-3 space-y-2.5">
+                  {project.outcome.map((item) => (
+                    <li
+                      key={item}
+                      className="flex items-start gap-2.5 text-sm leading-relaxed text-text-primary"
+                    >
+                      <span
+                        className={`mt-2 h-1.5 w-1.5 shrink-0 rounded-full ${project.colors.bg}`}
+                        aria-hidden
+                      />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-10 flex justify-center sm:mt-12">
+            <button
+              type="button"
+              onClick={onClose}
+              className="inline-flex h-11 items-center justify-center rounded-lg border border-border bg-surface-elevated px-6 text-sm font-medium text-text-primary transition-colors hover:border-accent/40 hover:text-accent"
+            >
+              Close
+            </button>
+          </div>
+        </motion.div>
+      </div>
+    </motion.div>
+  );
+}
+
+export function CaseStudy() {
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const portalReady = useHydrated();
+
+  useEffect(() => {
+    if (selectedIndex === null) {
+      document.body.style.overflow = "";
+      return;
+    }
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setSelectedIndex(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [selectedIndex]);
+
+  const selectedProject = selectedIndex !== null ? projects[selectedIndex] : null;
+
+  return (
+    <section
+      id="projects"
+      className="scroll-mt-20 relative overflow-hidden bg-background py-16 sm:py-20 md:py-28"
+      aria-label="Projects"
+    >
+      <div className="pointer-events-none absolute top-0 right-0 h-[min(50vw,30rem)] w-[min(50vw,30rem)] translate-x-1/3 -translate-y-1/3 rounded-full bg-accent/5 blur-[120px]" />
 
       <Container className="relative z-10 max-w-7xl">
         <motion.div
           variants={stagger(80)}
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-          className="flex flex-col items-center"
+          viewport={{ once: true, margin: "-80px" }}
         >
-          {/* Header Section */}
-          <motion.div variants={fadeUp} transition={medium} className="w-full text-center max-w-3xl mx-auto mb-16">
-            <div className="flex items-center justify-center gap-3 mb-6">
-              <span className="flex items-center justify-center">
-                <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-                <span className="h-0.5 w-6 bg-accent/30" />
-              </span>
-              <p className="text-xs md:text-sm font-bold uppercase tracking-[0.15em] text-accent">
-                Case Studies
+          <motion.div
+            variants={fadeUp}
+            transition={medium}
+            className="mx-auto mb-12 max-w-2xl text-center sm:mb-14 md:mb-16"
+          >
+            <div className="mb-4 flex items-center justify-center gap-3 sm:mb-5">
+              <span className="h-px w-10 bg-border sm:w-14" aria-hidden />
+              <p className="text-xs font-medium uppercase tracking-[0.2em] text-accent sm:text-sm">
+                Case studies
               </p>
+              <span className="h-px w-10 bg-border sm:w-14" aria-hidden />
             </div>
-            <h2 className="text-4xl text-pretty font-extrabold tracking-tight text-text-primary sm:text-5xl md:text-6xl">
+            <h2 className="text-balance text-2xl font-bold tracking-tight text-text-primary sm:text-3xl md:text-4xl">
               Work that speaks for itself.
             </h2>
-          </motion.div>
-
-          {/* Premium Segmented Navigation Tabs */}
-          <motion.div variants={fadeUp} transition={medium} className="w-full max-w-5xl mx-auto mb-12 sm:mb-16 px-4 md:px-0">
-            <div className="flex flex-col md:flex-row items-center gap-4 sm:gap-6 lg:gap-12">
-              {projects.map((project, idx) => {
-                const isActive = currentIndex === idx;
-                return (
-                  <button
-                    key={idx}
-                    onClick={() => {
-                      setCurrentIndex(idx);
-                      setExpandedProjectIndex(null);
-                    }}
-                    className="group relative flex-1 w-full text-left transition-all duration-500"
-                  >
-                    <div className="flex items-center justify-between mb-3 px-2">
-                      <span className={`text-xs font-bold uppercase tracking-[0.2em] transition-colors duration-500 ${isActive ? project.colors.text : 'text-text-tertiary group-hover:text-text-secondary'}`}>
-                        0{idx + 1} //
-                      </span>
-                      <span className={`text-xs sm:text-sm font-semibold tracking-wide transition-colors duration-500 ${isActive ? 'text-text-primary' : 'text-text-tertiary group-hover:text-text-secondary'}`}>
-                        {project.badgeLabel}
-                      </span>
-                    </div>
-
-                    {/* Progress Track Line */}
-                    <div className="h-1.5 w-full rounded-full bg-surface-elevated border border-border overflow-hidden relative">
-                       {isActive && (
-                         <motion.div 
-                           layoutId="activeSlideIndicator"
-                           className={`absolute inset-y-0 left-0 right-0 rounded-full ${project.colors.bg} ${project.colors.glow}`}
-                           transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                         />
-                       )}
-                    </div>
-                  </button>
-                );
-              })}
+            <div className="mt-5 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[11px] font-medium uppercase tracking-[0.14em] text-text-tertiary sm:mt-6">
+              {projects.map((p) => (
+                <span key={p.badgeLabel} className="inline-flex items-center gap-2">
+                  <span className={`h-1.5 w-1.5 rounded-full ${p.colors.bg}`} />
+                  {p.badgeLabel}
+                </span>
+              ))}
             </div>
+            <div className="mx-auto mt-8 h-px w-16 bg-gradient-to-r from-transparent via-accent/40 to-transparent" aria-hidden />
           </motion.div>
 
-          {/* Interactive Drag Track Window with Flanking Arrows */}
-          <motion.div variants={fadeUp} transition={medium} className="w-full relative px-0 sm:px-14 lg:px-20 py-4">
-            
-            {/* Flanking Left Arrow */}
-            <button
-              onClick={prevSlide}
-              className="hidden sm:flex absolute left-0 top-1/2 -translate-y-1/2 z-30 items-center justify-center h-14 w-14 rounded-full border border-border bg-surface-elevated/90 backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.1)] text-text-secondary hover:text-accent hover:border-accent hover:scale-110 transition-all duration-300"
-              aria-label="Previous Project"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </button>
-
-            {/* Flanking Right Arrow */}
-            <button
-              onClick={nextSlide}
-              className="hidden sm:flex absolute right-0 top-1/2 -translate-y-1/2 z-30 items-center justify-center h-14 w-14 rounded-full border border-border bg-surface-elevated/90 backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.1)] text-text-secondary hover:text-accent hover:border-accent hover:scale-110 transition-all duration-300"
-              aria-label="Next Project"
-            >
-              <ArrowRight className="h-5 w-5" />
-            </button>
-
-            {/* Drag Container */}
-            <div className={`w-full shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] rounded-[2.5rem] overflow-hidden bg-surface-elevated transition-all duration-700 ${expandedProjectIndex !== null ? 'ring-2 ring-border/50' : ''}`}>
-              <motion.div
-                className="flex cursor-grab active:cursor-grabbing"
-                animate={{ x: `-${currentIndex * 100}%` }}
-                transition={{ type: "spring", stiffness: 220, damping: 32, mass: 0.9 }}
-                drag="x"
-                dragConstraints={{ left: 0, right: 0 }}
-                dragElastic={0.4}
-                onDragEnd={(e, { offset }) => {
-                  const threshold = 50; // pixels
-                  if (offset.x < -threshold) {
-                    nextSlide();
-                  } else if (offset.x > threshold) {
-                    prevSlide();
-                  }
-                }}
-              >
-                {projects.map((project, idx) => {
-                  const Icon = project.icon;
-                  const isExpanded = expandedProjectIndex === idx;
-                  
-                  return (
-                    <div key={idx} className="w-full shrink-0 flex flex-col lg:flex-row lg:min-h-[640px] pointer-events-auto">
-                      
-                      {/* Left Content Half */}
-                      <div className="relative z-20 flex w-full lg:w-[45%] flex-col justify-between p-8 sm:p-10 lg:p-16 border-b lg:border-b-0 lg:border-r border-border/50 bg-surface-elevated">
-                        <div>
-                          <div className={`inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-1.5 mb-8 backdrop-blur-md shadow-sm pointer-events-none`}>
-                            <Icon className={`h-3.5 w-3.5 ${project.colors.text}`} />
-                            <span className={`text-[11px] sm:text-xs font-bold uppercase tracking-[0.2em] ${project.colors.text}`}>
-                              {project.title}
-                            </span>
-                          </div>
-
-                          <h3 className="mb-6 text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-text-primary text-balance leading-[1.1] pointer-events-none">
-                            {project.title}
-                          </h3>
-                          
-                          <p className="text-base sm:text-lg leading-relaxed text-text-secondary text-balance pointer-events-none">
-                            {project.overview}
-                          </p>
-                        </div>
-
-                        <div className="mt-10 lg:mt-12 grid grid-cols-1 sm:grid-cols-2 gap-8 lg:gap-10 pointer-events-none">
-                          <div>
-                            <h4 className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.2em] text-text-tertiary mb-4">Project Scope</h4>
-                            <ul className="space-y-3">
-                              {project.scope.map((item, i) => (
-                                <li key={i} className="flex items-start text-[13px] sm:text-sm font-medium text-text-primary leading-snug">
-                                  <span className={`mt-1.5 mr-3 h-1.5 w-1.5 shrink-0 rounded-full shadow-[0_0_8px_currentColor] ${project.colors.text} ${project.colors.bg}`} />
-                                  {item}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                          <div>
-                            <h4 className={`text-[11px] sm:text-xs font-bold uppercase tracking-[0.2em] mb-4 ${project.colors.text}`}>Key Outcomes</h4>
-                            <ul className="space-y-3">
-                              {project.outcome.map((item, i) => (
-                                <li key={i} className="flex items-start text-[13px] sm:text-sm font-medium text-text-primary leading-snug">
-                                  <span className={`mt-1.5 mr-3 h-1.5 w-1.5 shrink-0 rounded-full shadow-[0_0_8px_currentColor] ${project.colors.text} ${project.colors.bg}`} />
-                                  {item}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        </div>
-
-                        <div className="mt-12 pt-8 border-t border-border/50">
-                          {project.gallery ? (
-                            <button 
-                              onClick={() => setExpandedProjectIndex(isExpanded ? null : idx)}
-                              className={`group flex items-center gap-3 text-sm font-bold uppercase tracking-widest transition-colors duration-500 ${project.colors.text} hover:opacity-80`}
-                              aria-expanded={isExpanded}
-                            >
-                              {isExpanded ? "Close Gallery" : "Explore Details"}
-                              <span className={`flex items-center justify-center h-8 w-8 rounded-full border border-current ${project.colors.bgLight} transition-transform duration-500 ${isExpanded ? 'group-hover:-translate-y-1' : 'group-hover:translate-y-1'}`}>
-                                {isExpanded ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />}
-                              </span>
-                            </button>
-                          ) : (
-                            <button className={`group flex items-center gap-3 text-sm font-bold uppercase tracking-widest opacity-40 cursor-not-allowed ${project.colors.text}`} disabled>
-                              Coming Soon
-                            </button>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Right Image Half */}
-                      <div className={`relative w-full lg:w-[55%] min-h-[400px] sm:min-h-[500px] lg:min-h-full flex items-center justify-center overflow-hidden group border-l border-border/50 ${project.title.includes('Hospital') ? 'bg-white' : 'p-8 md:p-12 bg-gradient-to-br from-surface to-surface-elevated'}`}>
-                        {/* Background layers conditioned upon project type */}
-                        {project.title.includes('Hospital') ? (
-                          <div className="absolute inset-0 z-10 bg-gradient-to-r from-surface-elevated/40 via-transparent to-transparent pointer-events-none transition-colors duration-1000" />
-                        ) : (
-                          <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] ${project.colors.bgLight} blur-[120px] rounded-full pointer-events-none transition-colors duration-[1.5s]`} />
-                        )}
-                        
-                        <div className="relative z-10 w-full h-full min-h-[400px] lg:min-h-[640px] pointer-events-none flex items-center justify-center">
-                          <div className="relative w-full h-full transition-transform duration-[1.5s] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.04]">
-                              <Image 
-                                src={project.image}
-                                alt={`${project.title} BIM Render`}
-                                fill
-                                draggable={false}
-                                className={`${project.title.includes('Hospital') ? 'object-cover' : 'object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:drop-shadow-[0_20px_50px_rgba(255,255,255,0.05)]'} object-center`}
-                                sizes="(max-width: 1024px) 100vw, 55vw"
-                                quality={100}
-                                priority={idx === 0}
-                              />
-                          </div>
-                        </div>
-                        
-                        {/* Elegant Minimal Badge */}
-                        <div className="absolute bottom-6 right-6 z-20 flex items-center gap-2 rounded-full bg-surface-elevated/90 backdrop-blur-md border border-border shadow-xl px-5 py-2.5 transition-transform duration-700 hover:scale-105 pointer-events-none">
-                          <Icon className={`h-4 w-4 ${project.colors.text}`} />
-                          <span className="text-[10px] font-bold text-text-primary tracking-[0.1em] uppercase">Original Output</span>
-                        </div>
-                      </div>
-
-                    </div>
-                  );
-                })}
-              </motion.div>
-            </div>
-            
-            {/* Cinematic Overlay Modal Full Gallery */}
-            <AnimatePresence>
-              {expandedProjectIndex !== null && projects[expandedProjectIndex].gallery && (
-                <>
-                  {/* Fixed close button - separate from scrollable content */}
-                  <motion.button
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    onClick={() => setExpandedProjectIndex(null)}
-                    className="fixed top-20 right-4 md:top-24 md:right-8 flex items-center justify-center h-9 w-9 sm:h-10 sm:w-10 rounded-full bg-surface-elevated border border-border shadow-md hover:scale-110 transition-all duration-300 text-text-secondary hover:text-text-primary z-[120]"
-                    aria-label="Close Gallery"
-                  >
-                    <X className="h-4 w-4" />
-                  </motion.button>
-
-                  {/* Scrollable overlay */}
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="fixed inset-0 z-[100] overflow-y-auto bg-surface/95 backdrop-blur-xl"
-                  >
-
-                  <motion.div
-                    initial={{ opacity: 0, y: 40 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 40 }}
-                    transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                    className="w-full relative z-[105]"
-                  >
-                    
-                    {/* Header */}
-                    <div className="text-center py-12 md:py-16 px-4 max-w-3xl mx-auto">
-                       <span className={`inline-block mb-6 text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] px-4 py-1.5 rounded-full border border-border bg-surface ${projects[expandedProjectIndex].colors.text}`}>
-                         {projects[expandedProjectIndex].title}
-                       </span>
-                       <h3 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-text-primary mb-4 tracking-tight text-balance">
-                         Project Gallery
-                       </h3>
-                       <p className="text-base sm:text-lg text-text-secondary leading-relaxed">
-                         A comprehensive look into the architectural execution of the {projects[expandedProjectIndex].title}.
-                       </p>
-                    </div>
-
-                    {/* Full-width images stacked vertically with side padding */}
-                    <div className="flex flex-col px-8 sm:px-16 md:px-28 lg:px-40 xl:px-52 gap-8 md:gap-12">
-                      {projects[expandedProjectIndex].gallery?.map((img, i) => (
-                         <motion.div 
-                           key={i}
-                           initial={{ opacity: 0 }}
-                           whileInView={{ opacity: 1 }}
-                           viewport={{ once: true, margin: "-5%" }}
-                           transition={{ duration: 0.6, ease: "easeOut" }}
-                           className="w-full flex items-center justify-center"
-                         >
-                            <Image 
-                               src={img} 
-                               alt={`${projects[expandedProjectIndex].title} - View ${i+1}`} 
-                               width={2400}
-                               height={1600}
-                               className="w-full h-auto block max-h-[85vh] object-contain" 
-                               sizes="100vw"
-                               quality={100}
-                            />
-                         </motion.div>
-                      ))}
-                    </div>
-
-                    {/* Bottom Close Action */}
-                    <div className="py-12 flex justify-center bg-surface">
-                      <button 
-                        onClick={() => setExpandedProjectIndex(null)}
-                        className={`flex items-center gap-3 px-8 py-4 rounded-full bg-surface-elevated border border-border shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-sm font-bold uppercase tracking-widest ${projects[expandedProjectIndex].colors.text}`}
-                      >
-                        Close Gallery
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
-
-                  </motion.div>
-                  </motion.div>
-                </>
-              )}
-            </AnimatePresence>
-
-          </motion.div>
+          <motion.ul
+            variants={fadeUp}
+            transition={medium}
+            role="list"
+            className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-7 lg:grid-cols-3 lg:gap-8 2xl:grid-cols-4 2xl:gap-10"
+          >
+            {projects.map((project, index) => (
+              <li key={project.title} role="listitem">
+                <ProjectCard
+                  project={project}
+                  index={index}
+                  onOpen={() => setSelectedIndex(index)}
+                />
+              </li>
+            ))}
+          </motion.ul>
         </motion.div>
       </Container>
+
+      {portalReady &&
+        createPortal(
+          <AnimatePresence>
+            {selectedProject ? (
+              <ProjectDetailModal
+                key={selectedProject.title}
+                project={selectedProject}
+                onClose={() => setSelectedIndex(null)}
+              />
+            ) : null}
+          </AnimatePresence>,
+          document.body
+        )}
     </section>
   );
 }

@@ -112,15 +112,9 @@ function DesktopWorkflowStep({
   );
   const titleOpacity = useTransform(activePanel, (v) => (v === stepIndex ? 1 : 0.72));
   const descOpacity = useTransform(activePanel, (v) => (v === stepIndex ? 1 : 0.62));
-  const ringOpacity = useTransform(activePanel, (v) => (v === stepIndex ? 0.35 : 0));
   const nodeScale = useTransform(activePanel, (v) => (v === stepIndex ? 1.14 : 1));
   const nodeBorder = useTransform(activePanel, (v) =>
     v === stepIndex ? "rgba(59, 130, 246, 0.95)" : "rgba(113, 113, 122, 0.55)"
-  );
-  const nodeGlow = useTransform(activePanel, (v) =>
-    v === stepIndex
-      ? "0 0 22px rgba(59, 130, 246, 0.55), 0 0 40px rgba(59, 130, 246, 0.2)"
-      : "0 0 0 rgba(0,0,0,0)"
   );
   const nodeBg = useTransform(activePanel, (v) =>
     v === stepIndex ? "rgba(59, 130, 246, 0.12)" : "var(--background)"
@@ -138,17 +132,12 @@ function DesktopWorkflowStep({
           style={{
             scale: nodeScale,
             borderColor: nodeBorder,
-            boxShadow: nodeGlow,
             backgroundColor: nodeBg,
           }}
         >
           <motion.span className="text-xs font-bold tabular-nums" style={{ color: labelColor }}>
             {stepIndex + 1}
           </motion.span>
-          <motion.div
-            className="pointer-events-none absolute inset-0 rounded-full ring-2 ring-accent"
-            style={{ opacity: ringOpacity }}
-          />
         </motion.div>
       </div>
 
@@ -206,9 +195,7 @@ function MobileTimelineCard({
             scale: isActive ? 1.08 : 1,
             borderColor: isActive ? "rgb(59 130 246)" : "rgb(113 113 122 / 0.55)",
             backgroundColor: isActive ? "rgba(59, 130, 246, 0.12)" : "var(--background)",
-            boxShadow: isActive
-              ? "0 0 20px rgba(59, 130, 246, 0.45), 0 0 36px rgba(59, 130, 246, 0.12)"
-              : "0 0 0 rgba(0,0,0,0)",
+            boxShadow: "none",
           }}
           transition={{ type: "spring", stiffness: 400, damping: 30 }}
         >
@@ -270,19 +257,23 @@ export function BIMInAction() {
   const mobileFillScale = (mobileActive + 1) / STEP_COUNT;
 
   return (
-    <section className="bg-surface" aria-label="BIM in Action">
-      <div className="lg:hidden py-20">
+    <section
+      id="bim-in-action"
+      className="relative bg-surface scroll-mt-20"
+      aria-label="BIM in Action"
+    >
+      <div className="py-16 sm:py-20 lg:hidden">
         <Container>
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-60px" }}
           >
-            <motion.div variants={fadeUp} transition={medium} className="text-center mb-12">
-              <p className="text-sm font-medium uppercase tracking-widest text-accent mb-3">
+            <motion.div variants={fadeUp} transition={medium} className="mb-10 text-center sm:mb-12">
+              <p className="mb-3 text-xs font-medium uppercase tracking-widest text-accent sm:text-sm">
                 Coordination Workflow
               </p>
-              <h2 className="text-3xl font-bold tracking-tight text-text-primary">BIM in Action</h2>
+              <h2 className="text-2xl font-bold tracking-tight text-text-primary sm:text-3xl">BIM in Action</h2>
             </motion.div>
 
             <div className="relative">
@@ -320,7 +311,7 @@ export function BIMInAction() {
       <div ref={sectionRef} className="hidden lg:block relative" style={{ height: "250vh" }}>
         <div className="sticky top-0 h-screen flex items-start pt-6 sm:pt-7 md:pt-8">
           <Container wide>
-            <div className="grid grid-cols-2 gap-12 xl:gap-16 items-start">
+            <div className="grid grid-cols-2 gap-12 lg:gap-10 xl:gap-16 items-start">
               <div className="min-w-0">
                 <p className="text-sm font-medium uppercase tracking-widest text-accent mb-3">
                   Coordination Workflow
@@ -340,7 +331,7 @@ export function BIMInAction() {
                     aria-hidden
                   >
                     <motion.div
-                      className="h-full w-full origin-top rounded-full bg-gradient-to-b from-accent via-accent to-accent/75 will-change-transform shadow-[0_0_16px_rgba(59,130,246,0.35)]"
+                      className="h-full w-full origin-top rounded-full bg-gradient-to-b from-accent via-accent to-accent/75 will-change-transform"
                       style={{
                         scaleY: scrollYProgress,
                         transformOrigin: "top center",

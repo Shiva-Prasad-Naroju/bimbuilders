@@ -1,109 +1,89 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { useReducedMotion } from "framer-motion";
+import Image from "next/image";
+import { motion, useReducedMotion, useTransform, type MotionValue } from "framer-motion";
 
-const VIDEO_SRC = "/videos/videoAnimation.mp4";
+const HERO_IMG = "/images/hero-bg.png";
+
+type HeroBackdropProps = {
+  pointerX: MotionValue<number>;
+  pointerY: MotionValue<number>;
+  centerX: number;
+  centerY: number;
+  parallaxEnabled?: boolean;
+};
 
 /**
- * Cinematic video backdrop for the homepage hero: atmospheric, subdued, and
- * heavily overlaid so foreground content stays the focus. Degrades gracefully
- * when video fails to load or the user prefers reduced motion.
+ * Calm hero plate with soft ambient depth; optional pointer parallax on the photo layer.
  */
-export function HeroBackdrop() {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [videoFailed, setVideoFailed] = useState(false);
+export function HeroBackdrop({
+  pointerX,
+  pointerY,
+  centerX,
+  centerY,
+  parallaxEnabled = true,
+}: HeroBackdropProps) {
   const prefersReduced = useReducedMotion();
+  const on = parallaxEnabled && !prefersReduced && centerX > 0 && centerY > 0;
 
-  const showVideo = prefersReduced !== true && !videoFailed;
-
-  useEffect(() => {
-    if (!showVideo) return;
-    const el = videoRef.current;
-    if (!el) return;
-
-    const tryPlay = () => {
-      void el.play().catch(() => setVideoFailed(true));
-    };
-
-    tryPlay();
-    el.addEventListener("loadeddata", tryPlay);
-    return () => el.removeEventListener("loadeddata", tryPlay);
-  }, [showVideo]);
+  const imageX = useTransform(pointerX, (px) => (on ? ((px - centerX) / centerX) * -14 : 0));
+  const imageY = useTransform(pointerY, (py) => (on ? ((py - centerY) / centerY) * -10 : 0));
+  const orbX = useTransform(pointerX, (px) => (on ? ((px - centerX) / centerX) * 22 : 0));
+  const orbY = useTransform(pointerY, (py) => (on ? ((py - centerY) / centerY) * 18 : 0));
+  const orb2X = useTransform(orbX, (v) => -v * 0.6);
+  const orb2Y = useTransform(orbY, (v) => -v * 0.5);
 
   return (
-    <div
-      className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
+    <motion.div
+      className="pointer-events-none absolute inset-0 -z-10 min-h-full w-full overflow-hidden bg-zinc-950"
       aria-hidden
     >
-      {/* Static base — always present (fallback + foundation) */}
-      <div className="absolute inset-0 bg-background" />
-      <div
-        className="absolute inset-0 opacity-90"
-        style={{
-          background:
-            "radial-gradient(ellipse 100% 80% at 50% 0%, rgba(37, 99, 235, 0.09), transparent 50%), radial-gradient(ellipse 90% 60% at 80% 100%, rgba(15, 23, 42, 0.5), transparent 55%)",
-        }}
+      <motion.div
+        className="absolute inset-0 min-h-full min-w-full overflow-hidden"
+        style={{ x: imageX, y: imageY }}
+      >
+        <Image
+          src={HERO_IMG}
+          alt=""
+          fill
+          priority
+          quality={90}
+          sizes="100vw"
+          className="min-h-full min-w-full scale-[1.04] object-cover object-center brightness-[0.42] contrast-[0.92] saturate-[0.82]"
+        />
+      </motion.div>
+
+      <div className="absolute inset-0 bg-black/38" />
+
+      <motion.div
+        className="absolute -left-[12%] top-[18%] h-[min(52vw,28rem)] w-[min(52vw,28rem)] rounded-full bg-accent/[0.07] blur-[100px]"
+        style={{ x: orbX, y: orbY }}
+      />
+      <motion.div
+        className="absolute -right-[8%] bottom-[22%] h-[min(44vw,22rem)] w-[min(44vw,22rem)] rounded-full bg-blue-400/[0.05] blur-[90px]"
+        style={{ x: orb2X, y: orb2Y }}
       />
 
-      {showVideo ? (
-        <div className="hero-video-drift absolute inset-0 overflow-hidden">
-          <video
-            ref={videoRef}
-            className="absolute inset-0 h-full w-full scale-[1.02] object-cover opacity-80 [transform:translateZ(0)] will-change-transform"
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="metadata"
-            tabIndex={-1}
-            disablePictureInPicture
-            controlsList="nodownload nofullscreen noremoteplayback"
-            onError={() => setVideoFailed(true)}
-          >
-            <source src={VIDEO_SRC} type="video/mp4" />
-          </video>
-        </div>
-      ) : null}
-
-      {/* Readability & atmosphere — layered (video stays subtle) */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background/92 via-background/78 to-background" />
-      <div className="absolute inset-0 bg-gradient-to-r from-background/88 via-transparent to-background/75" />
-      <div
-        className="absolute inset-0 bg-gradient-to-br from-accent/[0.07] via-transparent to-blue-950/[0.1] opacity-90"
-        aria-hidden
-      />
-      {/* Soft vignette + edge darkening */}
       <div
         className="absolute inset-0"
         style={{
           background:
-            "radial-gradient(ellipse 85% 55% at 50% 35%, transparent 0%, rgba(0, 0, 0, 0.42) 78%, rgba(0, 0, 0, 0.75) 100%)",
-        }}
-      />
-      <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-background via-background/80 to-transparent" />
-      <div
-        className="absolute inset-0 opacity-[0.55]"
-        style={{
-          boxShadow: "inset 0 0 120px rgba(0, 0, 0, 0.55), inset 0 -60px 100px rgba(0, 0, 0, 0.35)",
+            "radial-gradient(ellipse min(94vw, 44rem) 74% at 50% 40%, rgba(0,0,0,0.58) 0%, rgba(0,0,0,0.34) 45%, rgba(0,0,0,0.1) 70%, transparent 100%)",
         }}
       />
 
-      {/* Tie-in with sticky header strip */}
-      <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-background via-background/65 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-transparent to-black/50" />
 
-      {/* Fine grid — very low contrast BIM-tech cue */}
       <div
-        className="absolute inset-0 opacity-[0.04]"
+        className="absolute inset-0"
         style={{
-          backgroundImage:
-            "linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px)",
-          backgroundSize: "48px 48px",
-          maskImage: "radial-gradient(ellipse 85% 70% at 50% 40%, black 15%, transparent 70%)",
-          WebkitMaskImage:
-            "radial-gradient(ellipse 85% 70% at 50% 40%, black 15%, transparent 70%)",
+          background:
+            "radial-gradient(ellipse 108% 88% at 50% 44%, transparent 0%, transparent 50%, rgba(0,0,0,0.38) 100%)",
         }}
       />
-    </div>
+
+      <div className="absolute inset-x-0 bottom-0 h-[32%] bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+      <motion.div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/60 via-black/16 to-transparent" />
+    </motion.div>
   );
 }

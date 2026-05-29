@@ -1,81 +1,145 @@
 import { NextResponse } from "next/server";
-import { Resend } from "resend";
+import {
+  getEmailJsConfigStatus,
+  isEmailJsConfigured,
+  isEmailJsServerReady,
+} from "@/lib/contact/config";
+import { sendAdminNotification, sendUserConfirmation } from "@/lib/contact/emailjs";
+import { checkRateLimit, pruneRateLimitStore } from "@/lib/contact/rate-limit";
+import { parseContactBody, toTemplateParams } from "@/lib/contact/validate";
 
-// Initialize Resend with API Key from environment variables
-const resend = new Resend(process.env.RESEND_API_KEY);
+export const runtime = "nodejs";
+
+function getClientIp(req: Request): string {
+  const forwarded = req.headers.get("x-forwarded-for");
+  if (forwarded) return forwarded.split(",")[0]?.trim() ?? "unknown";
+  return req.headers.get("x-real-ip")?.trim() ?? "unknown";
+}
+
+function adminFailureResponse(result: Extract<
+  Awaited<ReturnType<typeof sendAdminNotification>>,
+  { ok: false }
+>) {
+  const isConfigError =
+    result.code === "EMAILJS_NOT_CONFIGURED" ||
+    result.code === "EMAILJS_MISSING_PRIVATE_KEY" ||
+    result.code === "EMAILJS_NON_BROWSER_DISABLED" ||
+    result.code === "EMAILJS_STRICT_MODE";
+
+  const status = result.code === "EMAILJS_RATE_LIMITED"
+    ? 429
+    : isConfigError
+      ? 503
+      : result.status >= 400 && result.status < 600
+        ? result.status
+        : 502;
+
+  return NextResponse.json(
+    {
+      success: false,
+      error:
+        status === 503
+          ? "Contact form is temporarily unavailable. Please email us directly."
+          : "We could not send your message. Please try again or email us directly.",
+      code: result.code,
+      stage: "admin_notification",
+    },
+    { status }
+  );
+}
 
 export async function POST(req: Request) {
+  pruneRateLimitStore();
+
   try {
-    const { name, email, message } = await req.json();
-
-    if (!name || !email || !message) {
-      return NextResponse.json({ error: "Please fill all fields" }, { status: 400 });
+    if (!isEmailJsConfigured()) {
+      const status = getEmailJsConfigStatus();
+      console.error("[contact] EmailJS not configured. Missing:", status.missing.join(", "));
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Contact form is temporarily unavailable. Please email us directly.",
+          code: "EMAILJS_NOT_CONFIGURED",
+          stage: "configuration",
+          ...(process.env.NODE_ENV === "development" ? { missing: status.missing } : {}),
+        },
+        { status: 503 }
+      );
     }
 
-    // 1. Send notification email to BIM Builders team
-    const { data: teamData, error: teamError } = await resend.emails.send({
-      from: "BIM Builders Contact <onboarding@resend.dev>",
-      to: "info@bimbuilders.in",
-      subject: `New Project Inquiry: ${name}`,
-      text: `
-        New project inquiry received via website contact form.
-        
-        Name: ${name}
-        Email: ${email}
-        Message: ${message}
-      `,
-      replyTo: email,
+    if (!isEmailJsServerReady()) {
+      console.warn(
+        "[contact] EMAILJS_PRIVATE_KEY is missing — attempting send (requires EmailJS Security settings)."
+      );
+    }
+
+    const ip = getClientIp(req);
+    const rate = checkRateLimit(ip);
+    if (!rate.allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Too many requests. Please wait ${rate.retryAfterSec ?? 60} seconds and try again.`,
+          code: "RATE_LIMITED",
+          stage: "rate_limit",
+        },
+        { status: 429 }
+      );
+    }
+
+    const body = await req.json().catch(() => null);
+
+    const honeypot =
+      body && typeof body === "object"
+        ? String((body as Record<string, unknown>).website ?? "").trim()
+        : "";
+    if (honeypot) {
+      return NextResponse.json({ success: true });
+    }
+
+    const validated = parseContactBody(body);
+    if (!validated.ok) {
+      return NextResponse.json(
+        { success: false, error: validated.error, code: "VALIDATION_ERROR", stage: "validation" },
+        { status: 400 }
+      );
+    }
+
+    const templateParams = toTemplateParams(validated.data);
+
+    const adminResult = await sendAdminNotification(templateParams);
+    if (!adminResult.ok) {
+      console.error(
+        "[contact] Admin notification failed:",
+        adminResult.code,
+        adminResult.logDetail
+      );
+      return adminFailureResponse(adminResult);
+    }
+
+    const userResult = await sendUserConfirmation(templateParams);
+    if (!userResult.ok) {
+      console.warn(
+        "[contact] User confirmation failed (admin was notified):",
+        userResult.code,
+        userResult.logDetail
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      userConfirmationSent: userResult.ok,
     });
-
-    if (teamError) {
-      console.error("Resend Team Email Error:", teamError);
-    } else {
-      console.log("Resend Team Email Sent:", teamData);
-    }
-
-    // 2. Send acknowledgment email to the user
-    const { data: userData, error: userError } = await resend.emails.send({
-      from: "BIM Builders <onboarding@resend.dev>",
-      to: email,
-      subject: "We've received your project inquiry - BIM Builders",
-      html: `
-        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; color: #333; line-height: 1.6;">
-          <div style="background-color: #0f172a; padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
-            <h1 style="color: #fff; margin: 0; font-size: 24px;">BIM Builders</h1>
-          </div>
-          <div style="padding: 30px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 8px 8px;">
-            <h2 style="color: #0f172a; margin-top: 0;">Hello ${name},</h2>
-            <p>Thank you for reaching out to <strong>BIM Builders</strong>. We have successfully received your project details and our team is already reviewing them.</p>
-            <p>We pride ourselves on precision and coordination, and we will get back to you with a clear plan and next steps shortly.</p>
-            <div style="background-color: #f8fafc; border-left: 4px solid #3b82f6; padding: 15px; margin: 20px 0;">
-              <p style="margin: 0; font-style: italic; color: #64748b;">"Your message: ${message.length > 100 ? message.substring(0, 100) + '...' : message}"</p>
-            </div>
-            <p>In the meantime, feel free to explore our latest projects on our website.</p>
-            <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0;" />
-            <p style="font-size: 14px; color: #94a3b8; text-align: center;">
-              Best Regards,<br />
-              <strong>The BIM Builders Team</strong><br />
-              <a href="https://www.bimbuilders.in" style="color: #3b82f6; text-decoration: none;">www.bimbuilders.in</a>
-            </p>
-          </div>
-        </div>
-      `,
-    });
-
-    if (userError) {
-      console.error("Resend User Email Error:", userError);
-      // If the user email fails but team email works, we still want to know
-      return NextResponse.json({ 
-        success: true, 
-        warning: "Team notified, but user acknowledgment failed. This usually happens on Resend Free Tier if the recipient is not verified.",
-        error: userError 
-      });
-    }
-
-    console.log("Resend User Email Sent:", userData);
-    return NextResponse.json({ success: true, teamData, userData });
   } catch (error) {
-    console.error("Internal Server Error during email sending:", error);
-    return NextResponse.json({ error: "Internal server error. Please check logs." }, { status: 500 });
+    console.error("[contact] Unhandled error:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Something went wrong. Please try again later.",
+        code: "INTERNAL_ERROR",
+        stage: "handler",
+      },
+      { status: 500 }
+    );
   }
 }

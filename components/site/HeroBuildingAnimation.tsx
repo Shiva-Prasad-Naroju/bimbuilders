@@ -1,7 +1,7 @@
 "use client";
 
-import { motion, useMotionValue, useTransform } from "framer-motion";
-import { useCallback } from "react";
+import { motion, useMotionValue, useReducedMotion, useTransform } from "framer-motion";
+import { useCallback, useId } from "react";
 
 /* ── Isometric projection helpers ── */
 const ISO_ANGLE = Math.PI / 6; // 30 degrees
@@ -143,19 +143,33 @@ const particles = [
   { cx: 330, cy: 155, r: 1.1, delay: 2.8 },
 ];
 
-export function HeroBuildingAnimation() {
+type HeroBuildingAnimationProps = {
+  /** Mount: plays on load. InView: plays when scrolled into viewport. */
+  trigger?: "mount" | "inView";
+};
+
+export function HeroBuildingAnimation({ trigger = "mount" }: HeroBuildingAnimationProps) {
+  const reduced = useReducedMotion();
+  const uid = useId().replace(/:/g, "");
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
   const rotateX = useTransform(mouseY, [-200, 200], [2, -2]);
   const rotateY = useTransform(mouseX, [-200, 200], [-2, 2]);
 
+  const playProps = reduced
+    ? { initial: "visible" as const, animate: "visible" as const }
+    : trigger === "inView"
+      ? { initial: "hidden" as const, whileInView: "visible" as const, viewport: { once: true, margin: "-40px" } }
+      : { initial: "hidden" as const, animate: "visible" as const };
+
   const handleMouseMove = useCallback(
     (e: React.MouseEvent<SVGSVGElement>) => {
+      if (reduced) return;
       const rect = e.currentTarget.getBoundingClientRect();
       mouseX.set(e.clientX - rect.left - rect.width / 2);
       mouseY.set(e.clientY - rect.top - rect.height / 2);
     },
-    [mouseX, mouseY]
+    [mouseX, mouseY, reduced]
   );
 
   return (
@@ -166,22 +180,26 @@ export function HeroBuildingAnimation() {
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden
       onMouseMove={handleMouseMove}
-      style={{ rotateX, rotateY, perspective: 800 }}
+      style={
+        reduced
+          ? undefined
+          : { rotateX, rotateY, perspective: 800, transformStyle: "preserve-3d" }
+      }
     >
       <defs>
-        <linearGradient id="heroFront" x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id={`${uid}-front`} x1="0" y1="0" x2="0" y2="1">
           <stop stopColor="var(--accent)" stopOpacity="0.08" />
           <stop offset="1" stopColor="var(--accent)" stopOpacity="0.03" />
         </linearGradient>
-        <linearGradient id="heroSide" x1="0" y1="0" x2="1" y2="1">
+        <linearGradient id={`${uid}-side`} x1="0" y1="0" x2="1" y2="1">
           <stop stopColor="var(--accent)" stopOpacity="0.05" />
           <stop offset="1" stopColor="var(--accent)" stopOpacity="0.02" />
         </linearGradient>
-        <linearGradient id="heroTop" x1="0" y1="1" x2="1" y2="0">
+        <linearGradient id={`${uid}-top`} x1="0" y1="1" x2="1" y2="0">
           <stop stopColor="var(--accent)" stopOpacity="0.12" />
           <stop offset="1" stopColor="var(--accent)" stopOpacity="0.06" />
         </linearGradient>
-        <filter id="glow">
+        <filter id={`${uid}-glow`}>
           <feGaussianBlur stdDeviation="2" result="blur" />
           <feMerge>
             <feMergeNode in="blur" />
@@ -191,7 +209,7 @@ export function HeroBuildingAnimation() {
       </defs>
 
       {/* Phase 1: Grid lines */}
-      <motion.g initial="hidden" animate="visible">
+      <motion.g {...playProps}>
         {[0, 80, 160, 240, 320, 400].map((x, i) => (
           <motion.line
             key={`gv-${i}`}
@@ -217,14 +235,14 @@ export function HeroBuildingAnimation() {
       </motion.g>
 
       {/* Phase 3: Surface fills (behind wireframe) */}
-      <motion.g initial="hidden" animate="visible">
-        <motion.path d={frontFace} fill="url(#heroFront)" variants={fillIn} custom={1.6} />
-        <motion.path d={sideFace} fill="url(#heroSide)" variants={fillIn} custom={1.8} />
-        <motion.path d={topFace} fill="url(#heroTop)" variants={fillIn} custom={2.0} />
+      <motion.g {...playProps}>
+        <motion.path d={frontFace} fill={`url(#${uid}-front)`} variants={fillIn} custom={1.6} />
+        <motion.path d={sideFace} fill={`url(#${uid}-side)`} variants={fillIn} custom={1.8} />
+        <motion.path d={topFace} fill={`url(#${uid}-top)`} variants={fillIn} custom={2.0} />
       </motion.g>
 
       {/* Phase 2: Wireframe structure */}
-      <motion.g initial="hidden" animate="visible" stroke="var(--text-tertiary)" strokeWidth="1" fill="none">
+      <motion.g {...playProps} stroke="var(--text-tertiary)" strokeWidth="1" fill="none">
         {baseEdges.map((d, i) => (
           <motion.path key={`base-${i}`} d={d} variants={draw} custom={0.4 + i * 0.06} />
         ))}
@@ -240,7 +258,7 @@ export function HeroBuildingAnimation() {
       </motion.g>
 
       {/* Phase 4: Details (windows, bracing, MEP) */}
-      <motion.g initial="hidden" animate="visible" fill="none">
+      <motion.g {...playProps} fill="none">
         {windowLines.map((d, i) => (
           <motion.path key={`win-${i}`} d={d} stroke="var(--accent)" strokeWidth="0.5" strokeOpacity={0.3} variants={draw} custom={2.4 + i * 0.02} />
         ))}
@@ -251,12 +269,13 @@ export function HeroBuildingAnimation() {
           <motion.path key={`brace-${i}`} d={d} stroke="var(--neon-blue)" strokeWidth="0.8" strokeOpacity={0.4} strokeDasharray="3 3" variants={draw} custom={2.8 + i * 0.1} />
         ))}
         {mepLines.map((d, i) => (
-          <motion.path key={`mep-${i}`} d={d} stroke="#10b981" strokeWidth="1" strokeOpacity={0.5} variants={draw} custom={3.0 + i * 0.1} filter="url(#glow)" />
+          <motion.path key={`mep-${i}`} d={d} stroke="#10b981" strokeWidth="1" strokeOpacity={0.5} variants={draw} custom={3.0 + i * 0.1} filter={`url(#${uid}-glow)`} />
         ))}
       </motion.g>
 
       {/* Phase 5: Ambient floating particles */}
-      {particles.map((p, i) => (
+      {!reduced &&
+        particles.map((p, i) => (
         <motion.circle
           key={`p-${i}`}
           cx={p.cx}
@@ -276,13 +295,13 @@ export function HeroBuildingAnimation() {
 
       {/* Ambient edge glow pulse on main structure */}
       <motion.g
-        initial={{ opacity: 0 }}
-        animate={{ opacity: [0.3, 0.6, 0.3] }}
-        transition={{ duration: 4, repeat: Infinity, delay: 3.5, ease: "easeInOut" }}
+        initial={{ opacity: reduced ? 0.45 : 0 }}
+        animate={reduced ? { opacity: 0.45 } : { opacity: [0.3, 0.6, 0.3] }}
+        transition={{ duration: 4, repeat: reduced ? 0 : Infinity, delay: 3.5, ease: "easeInOut" }}
         fill="none"
         stroke="var(--neon-blue)"
         strokeWidth="1.5"
-        filter="url(#glow)"
+        filter={`url(#${uid}-glow)`}
       >
         {topEdges.map((d, i) => (
           <path key={`glow-${i}`} d={d} />

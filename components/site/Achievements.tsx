@@ -1,26 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useInView } from "framer-motion";
+import { useInView, useReducedMotion } from "framer-motion";
 import { Container } from "@/components/Container";
+import { useHydrated } from "@/lib/hooks";
 
 const STATS = [
-  { label: "Projects Completed", value: 19 },
-  { label: "Clients", value: 3 },
-  { label: "Countries", value: 3 },
+  { label: "Projects Completed", value: 50 },
+  { label: "Clients", value: 10 },
+  { label: "Countries", value: 5 },
 ] as const;
-
-function usePrefersReducedMotion() {
-  const [reduced, setReduced] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReduced(mq.matches);
-    const onChange = () => setReduced(mq.matches);
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
-  }, []);
-  return reduced;
-}
 
 function AnimatedStat({
   target,
@@ -38,11 +27,9 @@ function AnimatedStat({
   const [n, setN] = useState(0);
 
   useEffect(() => {
-    if (!started) return;
-    if (reducedMotion) {
-      setN(target);
-      return;
-    }
+    // Reduced-motion and not-yet-started are handled by `display` below, so the
+    // effect only drives the count-up animation — no synchronous setState here.
+    if (!started || reducedMotion) return;
     let cancelled = false;
     const duration = 1600;
     let startTs: number | null = null;
@@ -60,23 +47,25 @@ function AnimatedStat({
     };
   }, [started, target, reducedMotion]);
 
+  const display = !started ? 0 : reducedMotion ? target : n;
+
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex min-w-0 flex-col items-center px-1">
       <p
         className={
           compact
-            ? "text-xl font-bold tabular-nums tracking-tight text-white sm:text-2xl md:text-3xl"
-            : "text-3xl font-bold tabular-nums tracking-tight text-white sm:text-4xl md:text-5xl"
+            ? "text-base font-bold tabular-nums tracking-tight text-white sm:text-xl md:text-2xl"
+            : "text-xl font-bold tabular-nums tracking-tight text-white sm:text-3xl md:text-4xl"
         }
       >
-        {n}
+        {display}
         <span className="ml-0.5 align-baseline text-[0.72em] font-bold">+</span>
       </p>
       <p
         className={
           compact
-            ? "mt-1 max-w-[9rem] text-center text-[10px] font-medium leading-tight text-white/90 sm:mt-1.5 sm:max-w-none sm:text-xs md:text-sm"
-            : "mt-2 max-w-[14rem] text-center text-sm font-medium text-white/90 sm:text-base"
+            ? "mt-1 max-w-full text-balance text-center text-[9px] font-medium leading-tight text-white/90 sm:mt-1.5 sm:max-w-none sm:text-xs md:text-sm"
+            : "mt-1.5 max-w-full text-balance text-center text-[10px] font-medium leading-snug text-white/85 sm:mt-2 sm:text-xs md:text-sm"
         }
       >
         {label}
@@ -88,9 +77,8 @@ function AnimatedStat({
 export function Achievements({ embedded = false }: { embedded?: boolean }) {
   const sectionRef = useRef<HTMLElement>(null);
   const inView = useInView(sectionRef, { once: true, amount: 0.2 });
-  const reducedMotion = usePrefersReducedMotion();
-  const [hydrated, setHydrated] = useState(false);
-  useEffect(() => setHydrated(true), []);
+  const reducedMotion = useReducedMotion() ?? false;
+  const hydrated = useHydrated();
   const started = embedded ? hydrated : inView;
 
   return (
@@ -98,18 +86,27 @@ export function Achievements({ embedded = false }: { embedded?: boolean }) {
       ref={sectionRef}
       className={
         embedded
-          ? "mt-5 border-y border-white/10 bg-black py-3.5 sm:mt-6 sm:py-4 md:py-4.5"
-          : "border-y border-white/10 bg-black py-8 sm:py-10 md:py-12"
+          ? "relative mt-2 bg-black py-3 sm:mt-3 sm:py-4 md:py-5"
+          : "relative bg-black py-6 sm:py-7 md:py-8"
       }
       aria-labelledby="achievements-heading"
     >
+      {/* Soft gradient hairlines instead of hard borders */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent"
+      />
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent"
+      />
       <Container>
         <h2
           id="achievements-heading"
           className={
             embedded
-              ? "mb-3 text-center text-xl font-bold tracking-tight text-accent sm:mb-3.5 sm:text-2xl md:mb-4 md:text-3xl"
-              : "mb-8 text-center text-2xl font-bold tracking-tight text-accent sm:mb-9 sm:text-3xl md:mb-10 md:text-4xl"
+              ? "mb-2 text-center text-lg font-bold tracking-tight text-accent sm:mb-2.5 sm:text-xl md:mb-3 md:text-2xl"
+              : "mb-4 text-center text-lg font-bold tracking-tight text-accent sm:mb-5 sm:text-xl md:mb-6 md:text-2xl"
           }
         >
           Achievements
@@ -117,8 +114,8 @@ export function Achievements({ embedded = false }: { embedded?: boolean }) {
         <div
           className={
             embedded
-              ? "mx-auto grid max-w-3xl grid-cols-3 gap-3 sm:max-w-none sm:gap-5 md:gap-8"
-              : "mx-auto grid max-w-3xl grid-cols-1 gap-8 sm:max-w-none sm:grid-cols-3 sm:gap-6 md:gap-10"
+              ? "mx-auto grid max-w-3xl grid-cols-3 gap-2 sm:max-w-none sm:gap-4 md:gap-6"
+              : "mx-auto grid max-w-3xl grid-cols-3 gap-2 sm:max-w-none sm:gap-5 md:gap-7"
           }
         >
           {STATS.map((s) => (

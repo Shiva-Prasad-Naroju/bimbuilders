@@ -1,6 +1,6 @@
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
-import { AIAssistant } from "@/components/site/AIAssistant";
+import { SiteContactFloats } from "@/components/site/SiteContactFloats";
 
 export default function SiteLayout({
   children,
@@ -16,11 +16,15 @@ export default function SiteLayout({
         Skip to content
       </a>
       <Header />
-      <main id="main-content" className="min-h-dvh pt-16 outline-none" tabIndex={-1}>
+      <main
+        id="main-content"
+        className="min-h-dvh min-w-0 pt-16 outline-none"
+        tabIndex={-1}
+      >
         {children}
       </main>
       <Footer />
-      <AIAssistant />
+      <SiteContactFloats />
     </>
   );
 }
