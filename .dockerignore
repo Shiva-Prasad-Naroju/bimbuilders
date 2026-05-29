@@ -22,3 +22,7 @@ yarn-error.log*
 .vercel
 coverage
 *.tsbuildinfo
+
+# archived high-res image masters (never served / not in build)
+_masters
+Images

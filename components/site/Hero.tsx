@@ -26,15 +26,15 @@ import { useDocumentHidden } from "@/lib/hooks";
 const SLIDE_COUNT = 5;
 const AUTOPLAY_INTERVAL_MS = 5000;
 
-const HERO_IMG = "/images/hero-bg.png";
+const HERO_IMG = "/images/hero-bg.avif";
 const HERO_IMG_SIZE = { width: 1659, height: 948 };
-const SLIDE_ARCH_IMG = "/images/slides/bim-arch-and-structure.png";
+const SLIDE_ARCH_IMG = "/images/slides/bim-arch-and-structure.avif";
 const SLIDE_ARCH_SIZE = { width: 1521, height: 1034 };
-const SLIDE_SCAN_IMG = "/images/slides/scan-to-bim.png";
+const SLIDE_SCAN_IMG = "/images/slides/scan-to-bim.avif";
 const SLIDE_SCAN_SIZE = { width: 1717, height: 916 };
-const SLIDE_MASONRY_IMG = "/images/slides/masonry-shop-drawings.png";
+const SLIDE_MASONRY_IMG = "/images/slides/masonry-shop-drawings.avif";
 const SLIDE_MASONRY_SIZE = { width: 1254, height: 1254 };
-const SLIDE_LGS_IMG = "/images/slides/lgs.png";
+const SLIDE_LGS_IMG = "/images/slides/lgs.avif";
 const SLIDE_LGS_SIZE = { width: 1536, height: 1024 };
 
 /** Slide 1 brand overview — mirrors the 4-item grid on every service slide */

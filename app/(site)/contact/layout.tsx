@@ -9,7 +9,7 @@ export default function ContactLayout({
       {/* Full-page background — fixed so it stays put while scrolling */}
       <div className="fixed inset-0 -z-10 overflow-hidden" aria-hidden>
         <Image
-          src="/images/slides/bim-arch-and-structure.png"
+          src="/images/slides/bim-arch-and-structure.avif"
           alt=""
           fill
           priority

@@ -45,7 +45,7 @@ export const SERVICES: readonly ServiceDefinition[] = [
     description:
       "3D BIM from CAD, PDF, or concepts — architectural and structural elements, parametric Revit models, LOD 100–500, and coordination-ready delivery.",
     cardTagline: "LOD-ready Revit models from drawings or concepts.",
-    cardImage: "/images/BimModelling.png",
+    cardImage: "/images/BimModelling.avif",
     points: [
       "3D BIM modeling from CAD, PDF, or concept drawings",
       "Architectural & structural elements (walls, slabs, beams, columns, etc.)",
@@ -68,7 +68,7 @@ export const SERVICES: readonly ServiceDefinition[] = [
     description:
       "We coordinate Architectural, Structural, and MEP models in Navisworks, run clash detection, document issues, and support resolution before construction.",
     cardTagline: "Multi-trade coordination and clash resolution before site work.",
-    cardImage: "/images/bg.png",
+    cardImage: "/images/bg.avif",
     points: [
       "Multi-discipline model coordination (Architectural, Structural, MEP)",
       "Clash detection using Navisworks",
@@ -113,7 +113,7 @@ export const SERVICES: readonly ServiceDefinition[] = [
     description:
       "Masonry-focused documentation: layouts, reinforcement, openings, sections, elevations, schedules, and control joints.",
     cardTagline: "CMU layouts, reinforcement, and masonry-specific details.",
-    cardImage: "/images/MasonryImage.png",
+    cardImage: "/images/MasonryImage.avif",
     points: [
       "Masonry wall layout plans",
       "Horizontal & vertical reinforcement detailing",
@@ -136,7 +136,7 @@ export const SERVICES: readonly ServiceDefinition[] = [
     description:
       "LGS wall panels and framing systems with studs, tracks, connections, panelization-ready models, and shop drawings for fabrication.",
     cardTagline: "Cold-formed steel framing modeled for fabrication and install.",
-    cardImage: "/images/slides/lgs.png",
+    cardImage: "/images/slides/lgs.avif",
     points: [
       "LGS wall panels and framing systems",
       "Studs, tracks, and connection detailing",
@@ -158,7 +158,7 @@ export const SERVICES: readonly ServiceDefinition[] = [
     description:
       "Point cloud conversion (RCP, RCS, E57, LAS) into accurate as-built and retrofit-ready BIM aligned with field conditions.",
     cardTagline: "Field scans converted into accurate as-built and retrofit models.",
-    cardImage: "/images/scan2bim.png",
+    cardImage: "/images/scan2bim.avif",
     points: [
       "Conversion of point cloud data (RCP, RCS, E57, LAS)",
       "As-built BIM models",
@@ -224,7 +224,7 @@ export const SERVICES: readonly ServiceDefinition[] = [
     description:
       "Highly coordinated BIM for long-term use: constructability, approvals, permitting support, and integration with fabrication workflows.",
     cardTagline: "Lifecycle-grade models linking design, build, and operations data.",
-    cardImage: "/images/DigitalTwin.png",
+    cardImage: "/images/DigitalTwin.avif",
     points: [
       "Highly coordinated BIM models for lifecycle use",
       "Constructability analysis",

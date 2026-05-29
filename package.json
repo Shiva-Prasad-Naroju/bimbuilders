@@ -4,9 +4,9 @@
   "private": true,
   "scripts": {
     "predev": "node scripts/verify-dev-cache.mjs",
-    "dev": "next dev --webpack",
-    "dev:turbo": "next dev --turbopack",
-    "dev:clean": "node scripts/verify-dev-cache.mjs --force && next dev --webpack",
+    "dev": "next dev --turbopack",
+    "dev:webpack": "next dev --webpack",
+    "dev:clean": "node scripts/verify-dev-cache.mjs --force && next dev --turbopack",
     "dev:reset": "node scripts/reset-dev-cache.mjs",
     "build": "next build",
     "start": "next start",

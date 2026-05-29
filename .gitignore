@@ -11,9 +11,6 @@
 !.yarn/versions
 
 
-backend/.env
-backend/.env.*
-
 # testing
 /coverage
 
@@ -51,9 +48,13 @@ yarn-error.log*
 *.sw?
 .cursor/
 
+# archived high-res image masters (not part of runtime asset pipeline)
+/_masters/
+
 # vercel
 .vercel
 
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+

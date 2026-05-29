@@ -88,15 +88,14 @@ export function AIAssistant({
         }),
       });
 
-      const data = await response.json();
-      if (data.choices && data.choices[0]) {
-        setMessages((prev) => [
-          ...prev,
-          { role: "assistant", content: data.choices[0].message.content },
-        ]);
-      } else {
+      const data = await response.json().catch(() => null);
+      if (!response.ok || !data || typeof data.message !== "string") {
         throw new Error("Invalid response");
       }
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: data.message },
+      ]);
     } catch (error) {
       console.error("Chat error:", error);
       setMessages((prev) => [

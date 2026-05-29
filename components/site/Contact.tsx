@@ -9,6 +9,7 @@ import {
   Mail,
   MapPin,
   Phone,
+  XCircle,
 } from "lucide-react";
 import { Container } from "@/components/Container";
 import { SERVICES } from "@/lib/site/services-data";
@@ -40,11 +41,9 @@ const socialLinks = [
 
 export function Contact() {
   const [status, setStatus] = useState<Status>("idle");
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setErrorMsg(null);
 
     const form = e.currentTarget;
     if (!form.checkValidity()) {
@@ -76,19 +75,15 @@ export function Contact() {
         }),
       });
 
-      const data = (await res.json().catch(() => ({}))) as {
-        error?: string;
-        success?: boolean;
-      };
+      await res.json().catch(() => ({}));
 
       if (!res.ok) {
-        throw new Error(data.error ?? "Failed to send message. Please try again.");
+        throw new Error("send_failed");
       }
 
       setStatus("sent");
-    } catch (err) {
+    } catch {
       setStatus("error");
-      setErrorMsg(err instanceof Error ? err.message : "Failed to send. Please try again.");
     }
   }
 
@@ -139,6 +134,40 @@ export function Contact() {
                 <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-text-secondary">
                   Thanks for reaching out. We&apos;ll get back to you at the email you provided.
                 </p>
+              </motion.div>
+            ) : status === "error" ? (
+              <motion.div
+                key="error"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.25 }}
+                className={`mx-auto mt-6 max-w-xl ${surfaceCardClass} px-6 py-12 text-center sm:mt-7 sm:px-10 lg:mt-8`}
+                role="alert"
+              >
+                <XCircle
+                  className="mx-auto h-10 w-10 text-red-500"
+                  strokeWidth={1.5}
+                  aria-hidden
+                />
+                <p className="mt-4 text-lg font-medium text-text-primary">Message not sent</p>
+                <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-text-secondary">
+                  We couldn&apos;t send your message right now. Please email us directly at{" "}
+                  <a
+                    href={`mailto:${SITE_EMAIL}`}
+                    className="font-medium text-text-primary underline underline-offset-2 transition-colors hover:text-accent"
+                  >
+                    {SITE_EMAIL}
+                  </a>
+                  , or try again in a moment.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setStatus("idle")}
+                  className="mt-6 inline-flex h-10 items-center justify-center rounded-full bg-accent px-7 text-sm font-medium text-white shadow-[0_6px_20px_-8px_var(--accent-glow)] transition-all duration-200 hover:bg-accent-hover hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  Try again
+                </button>
               </motion.div>
             ) : (
               <motion.div
@@ -311,15 +340,6 @@ export function Contact() {
                           className={`${fieldClass} resize-y min-h-[7.5rem] leading-relaxed`}
                         />
                       </Field>
-
-                      {errorMsg ? (
-                        <p
-                          role="alert"
-                          className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-200"
-                        >
-                          {errorMsg}
-                        </p>
-                      ) : null}
 
                       <div className="flex flex-col gap-4 pt-1 sm:flex-row sm:items-center sm:justify-between">
                         <p className="text-xs leading-relaxed text-text-tertiary">

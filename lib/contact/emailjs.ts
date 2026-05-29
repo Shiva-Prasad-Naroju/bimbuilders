@@ -1,7 +1,9 @@
 import { ADMIN_EMAIL, getEmailJsConfig } from "@/lib/contact/config";
 import { classifyEmailJsError, type EmailJsErrorCode } from "@/lib/contact/emailjs-errors";
+import { fetchWithTimeout, FetchTimeoutError } from "@/lib/api/fetch-with-timeout";
 
 const EMAILJS_SEND_URL = "https://api.emailjs.com/api/v1.0/email/send";
+const EMAILJS_TIMEOUT_MS = 10_000;
 
 export type EmailJsSendResult =
   | { ok: true; status: number }
@@ -68,10 +70,11 @@ export async function sendEmailJsTemplate(
   }
 
   try {
-    const res = await fetch(EMAILJS_SEND_URL, {
+    const res = await fetchWithTimeout(EMAILJS_SEND_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
+      timeoutMs: EMAILJS_TIMEOUT_MS,
     });
 
     if (res.ok) {
@@ -80,13 +83,6 @@ export async function sendEmailJsTemplate(
 
     const responseText = await parseEmailJsResponseBody(res);
     const classified = classifyEmailJsError(res.status, responseText);
-
-    console.error(
-      `[contact] EmailJS ${context.template} send failed:`,
-      res.status,
-      classified.code,
-      classified.logDetail
-    );
 
     return {
       ok: false,
@@ -97,12 +93,14 @@ export async function sendEmailJsTemplate(
       template: context.template,
     };
   } catch (err) {
+    const timedOut = err instanceof FetchTimeoutError;
     const logDetail = err instanceof Error ? err.message : String(err);
-    console.error(`[contact] EmailJS ${context.template} request error:`, logDetail);
     return {
       ok: false,
-      status: 500,
-      message: "Email service is unreachable. Please try again later.",
+      status: timedOut ? 504 : 500,
+      message: timedOut
+        ? "Email service did not respond in time. Please try again."
+        : "Email service is unreachable. Please try again later.",
       code: "EMAILJS_REQUEST_FAILED",
       logDetail,
       template: context.template,

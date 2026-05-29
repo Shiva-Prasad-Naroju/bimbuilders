@@ -117,7 +117,7 @@ const projects = [
   {
     type: "Residential",
     title: "LGSF Residential BIM",
-    image: "/images/LGSF_ProjectImages/1.jpeg",
+    image: "/images/LGSF_ProjectImages/1.avif",
     overview:
       "Fully coordinated Light Gauge Steel Framing residential model delivered in Autodesk Revit — wall studs, roof trusses, rafters, and framing assemblies built parametrically for clash-free, construction-ready execution.",
     scope: [
@@ -139,13 +139,13 @@ const projects = [
     badgeLabel: "Light Gauge Steel Framing",
     icon: Frame,
     gallery: [
-      "/images/LGSF_ProjectImages/1.jpeg",
-      "/images/LGSF_ProjectImages/2.jpeg",
-      "/images/LGSF_ProjectImages/3.jpeg",
-      "/images/LGSF_ProjectImages/4.jpeg",
-      "/images/LGSF_ProjectImages/5.jpeg",
-      "/images/LGSF_ProjectImages/6.jpeg",
-      "/images/LGSF_ProjectImages/7.jpeg",
+      "/images/LGSF_ProjectImages/1.avif",
+      "/images/LGSF_ProjectImages/2.avif",
+      "/images/LGSF_ProjectImages/3.avif",
+      "/images/LGSF_ProjectImages/4.avif",
+      "/images/LGSF_ProjectImages/5.avif",
+      "/images/LGSF_ProjectImages/6.avif",
+      "/images/LGSF_ProjectImages/7.avif",
     ],
   },
 ] as const;

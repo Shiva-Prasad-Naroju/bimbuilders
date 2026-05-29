@@ -125,7 +125,7 @@ function ToolCard({ tool, index }: { tool: Tool; index: number }) {
           width={180}
           height={64}
           sizes="(min-width: 640px) 108px, 92px"
-          priority={index < 4}
+          loading="lazy"
           unoptimized={tool.logo.endsWith(".svg")}
           className={logoClassName(tool)}
         />

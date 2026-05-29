@@ -127,11 +127,9 @@ function CarouselPagination({
 
 function OfferCard({
   service,
-  globalIndex,
   reduceMotion,
 }: {
   service: ServiceDefinition;
-  globalIndex: number;
   reduceMotion: boolean;
 }) {
   return (
@@ -155,7 +153,7 @@ function OfferCard({
                 ? ""
                 : "transition-transform duration-700 ease-out group-hover:scale-[1.05] group-focus-visible:scale-[1.05]"
             }`}
-            priority={globalIndex < 2}
+            loading="lazy"
           />
           <div
             className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-black/5 to-transparent"
@@ -338,7 +336,7 @@ export function WhatWeCanDo() {
                       }}
                       inert={!inView}
                     >
-                      <OfferCard service={service} globalIndex={i} reduceMotion={prefersReduced ?? false} />
+                      <OfferCard service={service} reduceMotion={prefersReduced ?? false} />
                     </div>
                   );
                 })}
